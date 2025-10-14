@@ -1,9 +1,9 @@
-
 import React, { useState, useCallback } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { DomainCard } from './components/DomainCard';
 import { WhoisModal } from './components/WhoisModal';
+import { AdsenseBlock } from './components/AdsenseBlock';
 import { generateDomains, checkAvailability, getWhoisInfo } from './services/geminiService';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import type { DomainInfo, WhoisData, DomainStatus } from './types';
@@ -40,7 +40,7 @@ const App: React.FC = () => {
       });
       const results = await Promise.all(availabilityChecks);
       setDomains(results);
-    } catch (err) {
+    } catch (err)      {
       console.error(err);
       setError('Failed to generate domain names. Please try again later.');
     } finally {
@@ -123,6 +123,10 @@ const App: React.FC = () => {
           </div>
           {error && <p className="text-red-400 text-center mt-2">{error}</p>}
         </form>
+        
+        <div className="max-w-2xl mx-auto">
+          <AdsenseBlock slot="YOUR_AD_SLOT_ID" />
+        </div>
 
         {isLoading && (
           <div className="text-center py-10">
@@ -134,7 +138,7 @@ const App: React.FC = () => {
         )}
 
         {domains.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             {domains.map((domain, index) => (
               <React.Fragment key={domain.name}>
                 <DomainCard
