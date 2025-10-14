@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from '@google/genai';
 import type { WhoisData } from '../types';
 import { DomainStatus } from '../types';
@@ -14,19 +13,19 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
   const prompt = `
     As a world-class branding expert and a savvy affiliate marketer, generate 21 creative and brandable domain names based on the concept: "${keyword}".
 
-    Your suggestions must be strategically optimized for high affiliate commissions on Namecheap based on their payout structure.
+    Your suggestions must be strategically optimized for high affiliate commissions on registrars like GoDaddy.
     
     Naming Strategies:
     - Use evocative, metaphorical, portmanteau, and abstract naming styles.
 
     Affiliate & TLD Strategy:
     - **PRIORITIZE HIGH-COMMISSION TLDs:** Focus heavily on TLDs with good commission rates: .com, .io, .ai, .co, .app, .xyz, .tech, .org, .net, and .dev.
-    - **AVOID ZERO-COMMISSION CATEGORIES:** Absolutely avoid suggesting domains with TLDs like '.inc' or names that imply a zero-commission product like a trial, marketplace listing, or free app.
+    - **AVOID ZERO-COMMISSION CATEGORIES:** Absolutely avoid suggesting domains with TLDs that typically have low or zero commissions.
     
     Description Requirement:
     - For each name, provide a concise "description" that explains the creative concept.
-    - **STRATEGIC UPSELL:** In the description, naturally suggest a valuable next step that leads to a high-commission product. Prioritize upselling annual hosting plans (35% commission) or VPNs (53% commission) where contextually appropriate.
-    - Example Description Format: "A sharp, memorable name for a new fintech app, perfect for launching on Namecheap's secure annual hosting." or "An evocative name for a privacy blog, which you can protect with Namecheap's high-speed VPN."
+    - **STRATEGIC UPSELL:** In the description, naturally suggest a valuable next step that leads to a high-commission product. Prioritize upselling annual hosting plans or security products where contextually appropriate.
+    - Example Description Format: "A sharp, memorable name for a new fintech app, perfect for launching with a secure hosting package." or "An evocative name for a privacy blog, which you can protect with professional email and security add-ons."
 
     CRITICAL RULES:
     1.  **NO BORING NAMES:** Avoid simple keyword additions.
@@ -52,7 +51,7 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
                 },
                 description: {
                   type: Type.STRING,
-                  description: 'A creative concept with an integrated upsell suggestion for a high-commission service like hosting or VPNs.'
+                  description: 'A creative concept with an integrated upsell suggestion for a high-commission service like hosting or security.'
                 }
               },
               required: ['name', 'description']
@@ -74,49 +73,49 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
 };
 
 /**
- * Checks domain availability using the Namecheap API.
- * This uses the Namecheap sandbox environment. To go live, you'll need a production API key.
+ * Checks domain availability using the GoDaddy API.
  * @param domainName - The domain name to check.
  * @returns A promise that resolves to DomainStatus.
  */
 export const checkAvailability = async (domainName: string): Promise<DomainStatus> => {
-  // --- ACTION REQUIRED: REPLACE PLACEHOLDERS WITH YOUR CREDENTIALS ---
-  // 1. Get your API Key from your Namecheap account: Profile -> Tools -> Namecheap API Access
-  // 2. Whitelist your public IP address in the same section. Google "what is my ip" to find it.
+  // --- ACTION REQUIRED: REPLACE PLACEHOLDERS WITH YOUR GODADDY CREDENTIALS ---
+  // 1. Get your API Key & Secret from the GoDaddy Developer Portal: https://developer.godaddy.com/keys
+  // 2. You may need to request production access for real-world use.
+
+  const API_KEY = 'your_godaddy_api_key';     // <-- PASTE your GoDaddy API Key here
+  const API_SECRET = 'your_godaddy_api_secret'; // <-- PASTE your GoDaddy API Secret here
   
-  const API_USER = 'your_namecheap_username';     // <-- PASTE your Namecheap Username here
-  const API_KEY = 'your_namecheap_api_key';       // <-- PASTE your Namecheap API Key here
-  const USER_NAME = 'your_namecheap_username';    // <-- PASTE your Namecheap Username here (again)
-  const CLIENT_IP = 'your_public_ip_address';   // <-- PASTE your whitelisted public IP address here
+  // For testing, use the OTE (Operational Test Environment) URL. For production, change to 'https://api.godaddy.com'.
+  const API_ENDPOINT = 'https://api.ote-godaddy.com/v1/domains/available';
 
-  // For testing, use the sandbox URL. For production, change to 'https://api.namecheap.com/xml.response'.
-  const API_ENDPOINT = 'https://api.sandbox.namecheap.com/xml.response';
-
-  const url = `${API_ENDPOINT}?ApiUser=${API_USER}&ApiKey=${API_KEY}&UserName=${USER_NAME}&Command=namecheap.domains.check&ClientIp=${CLIENT_IP}&DomainList=${domainName}`;
+  const url = `${API_ENDPOINT}?domain=${domainName}`;
 
   try {
-    // If your API credentials are just placeholders, the call will fail.
-    if (API_KEY === 'your_namecheap_api_key' || CLIENT_IP === 'your_public_ip_address') {
-        console.warn("Namecheap API credentials are placeholders. Domain check is disabled.");
+    // If your API credentials are just placeholders, the call will be skipped.
+    if (API_KEY === 'your_godaddy_api_key' || API_SECRET === 'your_godaddy_api_secret') {
+        console.warn("GoDaddy API credentials are placeholders. Domain check is disabled.");
         return DomainStatus.Unknown;
     }
       
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `sso-key ${API_KEY}:${API_SECRET}`
+      }
+    });
+    
     if (!response.ok) {
-        console.error("Namecheap API request failed:", response.statusText);
+        console.error("GoDaddy API request failed:", response.status, response.statusText);
+        const errorBody = await response.json().catch(() => ({}));
+        console.error("Error details:", errorBody);
         return DomainStatus.Unknown;
     }
 
-    const xmlText = await response.text();
-    // Simple XML parsing: check if the 'Available' attribute is true.
-    if (xmlText.includes(`IsAvailable="true"`)) {
+    const data = await response.json();
+    
+    if (data.available) {
       return DomainStatus.Available;
-    } else if (xmlText.includes(`IsAvailable="false"`)) {
-      return DomainStatus.Taken;
     } else {
-      // This can happen if the API key is wrong or IP is not whitelisted.
-      console.error("Could not determine domain status from Namecheap response:", xmlText);
-      return DomainStatus.Unknown;
+      return DomainStatus.Taken;
     }
   } catch (error) {
     console.error('Error checking domain availability:', error);

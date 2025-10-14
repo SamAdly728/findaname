@@ -73,17 +73,19 @@ const App: React.FC = () => {
   }, [setFavorites]);
 
   const generateAffiliateLink = (domainName: string) => {
-    // Your numeric Affiliate ID from Impact.com
-    const impactAffiliateId = '6611098'; 
+    // --- ACTION REQUIRED: REPLACE PLACEHOLDER WITH YOUR AFFILIATE CODE ---
+    // Sign up for a GoDaddy affiliate program (e.g., through CJ Affiliate) to get your code.
+    const goDaddyAffiliateCode = 'YOUR_AFFILIATE_CODE'; // <-- PASTE your affiliate tracking code here
     
-    // This is Namecheap's program ID on the Impact platform.
-    const namecheapProgramId = '5193';
-
-    // The destination URL on Namecheap's site.
-    const deepLink = `https://www.namecheap.com/domains/registration/results.aspx?domain=${domainName}`;
+    const deepLink = `https://www.godaddy.com/domains/searchresults.aspx?domainToCheck=${domainName}`;
     
-    // Construct the official Impact tracking link.
-    return `https://namecheap.pxf.io/c/${impactAffiliateId}/${namecheapProgramId}?u=${encodeURIComponent(deepLink)}`;
+    // This is a common structure, but might vary depending on the affiliate network (e.g., CJ.com)
+    // For CJ, it might look more complex. This is a simplified example.
+    if (goDaddyAffiliateCode !== 'YOUR_AFFILIATE_CODE') {
+        return `${deepLink}&isc=${goDaddyAffiliateCode}`;
+    }
+    
+    return deepLink; // Fallback to non-affiliate link
   };
 
   return (
