@@ -26,7 +26,7 @@ export const DomainCard: React.FC<DomainCardProps> = ({ domain, isFavorite, onTo
       <div>
         <div className="flex justify-between items-start mb-3">
           <h3 className="text-2xl font-bold text-blue-100 break-all">{domain.name}</h3>
-          <button onClick={onToggleFavorite} className="p-1 text-gray-400 hover:text-yellow-400 transition-colors">
+          <button onClick={onToggleFavorite} className="p-1 text-gray-400 hover:text-yellow-400 transition-colors" aria-label={`Favorite ${domain.name}`}>
             <StarIcon className={`h-6 w-6 ${isFavorite ? 'text-yellow-400 fill-current' : ''}`} />
           </button>
         </div>
@@ -52,7 +52,7 @@ export const DomainCard: React.FC<DomainCardProps> = ({ domain, isFavorite, onTo
             {domain.status === DomainStatus.Available && (
                 <div className="relative group">
                     <InfoIcon className="h-5 w-5 text-gray-400 cursor-pointer" />
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-800 border border-white/20 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-800 border border-white/20 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                         This opens NameSilo with our affiliate link. If you make a purchase, we may earn a commission at no extra cost to you. Thank you for your support!
                         <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800"></div>
                     </div>
@@ -61,9 +61,9 @@ export const DomainCard: React.FC<DomainCardProps> = ({ domain, isFavorite, onTo
         </div>
         
         <div className="flex items-center justify-center sm:justify-end space-x-2 text-gray-400">
-           <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer" className="p-2 hover:text-white"><TwitterIcon className="w-5 h-5" /></a>
-           <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer" className="p-2 hover:text-white"><FacebookIcon className="w-5 h-5" /></a>
-           <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} target="_blank" rel="noopener noreferrer" className="p-2 hover:text-white"><LinkedInIcon className="w-5 h-5" /></a>
+           <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer" className="p-2 hover:text-white" aria-label="Share on Twitter"><TwitterIcon className="w-5 h-5" /></a>
+           <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer" className="p-2 hover:text-white" aria-label="Share on Facebook"><FacebookIcon className="w-5 h-5" /></a>
+           <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} target="_blank" rel="noopener noreferrer" className="p-2 hover:text-white" aria-label="Share on LinkedIn"><LinkedInIcon className="w-5 h-5" /></a>
         </div>
       </div>
     </div>

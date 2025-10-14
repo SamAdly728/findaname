@@ -22,7 +22,7 @@ function getAiClient(): GoogleGenAI {
  * @returns A promise that resolves to an array of objects, each with a domain name and a creative description.
  */
 export const generateDomains = async (keyword: string): Promise<{name: string, description: string}[]> => {
-  const ai = getAiClient(); // Get client instance here
+  const ai = getAiClient();
   const prompt = `
     As a world-class branding expert and a savvy affiliate marketer, generate 21 creative and brandable domain names based on the concept: "${keyword}".
 
@@ -81,7 +81,7 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
     return jsonResponse.domains || [];
   } catch (e) {
     console.error("Failed to parse Gemini response:", e, response.text);
-    return [];
+    throw new Error("The AI failed to return a valid list of domains.");
   }
 };
 
@@ -151,8 +151,8 @@ export const getWhoisInfo = async (domainName: string): Promise<WhoisData> => {
     }
 
     const record = data.WhoisRecord;
-    if (!record) {
-      return { error: 'No WHOIS record found for this domain.' };
+    if (!record || !record.createdDate) {
+      return { error: 'No WHOIS record found for this domain. It might be available!' };
     }
     
     return {

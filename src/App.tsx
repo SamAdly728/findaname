@@ -80,13 +80,14 @@ const App: React.FC = () => {
   }, [setFavorites]);
 
   const generateAffiliateLink = (domainName: string) => {
-    // --- ACTION REQUIRED: ADD THIS VALUE TO YOUR ENVIRONMENT VARIABLES (.env file or hosting provider) ---
+    // --- ACTION REQUIRED: ADD THIS VALUE TO YOUR ENVIRONMENT VARIABLES ---
+    // e.g., in a .env.local file: VITE_NAMESILO_AFFILIATE_CODE=a5fe41269e066dfef064e
     const nameSiloAffiliateCode = process.env.NAMESILO_AFFILIATE_CODE;
     
     const searchLink = `https://www.namesilo.com/register.php?domain=${domainName}`;
     
     // Append the affiliate code (rid) to the search link if it's provided.
-    if (nameSiloAffiliateCode) {
+    if (nameSiloAffiliateCode && nameSiloAffiliateCode !== 'undefined') {
         return `${searchLink}&rid=${nameSiloAffiliateCode}`;
     }
     
@@ -140,22 +141,21 @@ const App: React.FC = () => {
             <div className="inline-block">
                 <LoaderIcon className="h-12 w-12 animate-spin text-blue-400" />
             </div>
-            <p className="mt-4 text-lg text-blue-200">Searching for perfect domains...</p>
+            <p className="mt-4 text-lg text-blue-200">Checking availability...</p>
           </div>
         )}
 
         {domains.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {domains.map((domain, index) => (
-              <React.Fragment key={domain.name}>
-                <DomainCard
-                  domain={domain}
-                  isFavorite={favorites.includes(domain.name)}
-                  onToggleFavorite={() => handleToggleFavorite(domain.name)}
-                  onViewWhois={() => handleViewWhois(domain)}
-                  onBuy={() => window.open(generateAffiliateLink(domain.name), '_blank')}
-                />
-              </React.Fragment>
+            {domains.map((domain) => (
+              <DomainCard
+                key={domain.name}
+                domain={domain}
+                isFavorite={favorites.includes(domain.name)}
+                onToggleFavorite={() => handleToggleFavorite(domain.name)}
+                onViewWhois={() => handleViewWhois(domain)}
+                onBuy={() => window.open(generateAffiliateLink(domain.name), '_blank', 'noopener,noreferrer')}
+              />
             ))}
           </div>
         )}
