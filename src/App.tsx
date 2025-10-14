@@ -83,9 +83,9 @@ const App: React.FC = () => {
     // --- ACTION REQUIRED: ADD THIS VALUE TO YOUR ENVIRONMENT VARIABLES (.env file or hosting provider) ---
     const nameSiloAffiliateCode = process.env.NAMESILO_AFFILIATE_CODE;
     
-    const searchLink = `https://www.namesilo.com/domain/search-domains?query=${domainName}`;
+    const searchLink = `https://www.namesilo.com/register.php?domain=${domainName}`;
     
-    // Append the affiliate code to the search link if it's provided
+    // Append the affiliate code (rid) to the search link if it's provided.
     if (nameSiloAffiliateCode) {
         return `${searchLink}&rid=${nameSiloAffiliateCode}`;
     }
