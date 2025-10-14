@@ -40,9 +40,15 @@ const App: React.FC = () => {
       });
       const results = await Promise.all(availabilityChecks);
       setDomains(results);
-    } catch (err)      {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       console.error(err);
-      setError('Failed to generate domain names. Please try again later.');
+      // Provide a more helpful message for the most common deployment error.
+      if (errorMessage.includes('VITE_GEMINI_API_KEY')) {
+        setError('Configuration Error: The AI service is not set up correctly.');
+      } else {
+        setError(`Failed to generate domains: ${errorMessage}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +64,12 @@ const App: React.FC = () => {
       setWhoisData(data);
     } catch (err) {
       console.error(err);
-      setWhoisData({ error: 'Failed to fetch WHOIS data.' });
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      if (errorMessage.includes('VITE_GEMINI_API_KEY')) {
+        setWhoisData({ error: 'Configuration Error: The AI service is not set up correctly.' });
+      } else {
+        setWhoisData({ error: `Failed to fetch WHOIS data: ${errorMessage}` });
+      }
     } finally {
       setIsWhoisLoading(false);
     }

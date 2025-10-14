@@ -2,7 +2,19 @@ import { GoogleGenAI, Type } from '@google/genai';
 import type { WhoisData } from '../types';
 import { DomainStatus } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+/**
+ * Lazily initializes and returns the GoogleGenAI client.
+ * Throws an error if the API key is not available in the environment variables.
+ * @returns {GoogleGenAI} The initialized GoogleGenAI client.
+ */
+function getAiClient(): GoogleGenAI {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    // This error will be caught by the calling function in App.tsx
+    throw new Error('VITE_GEMINI_API_KEY is not configured in the environment.');
+  }
+  return new GoogleGenAI({ apiKey });
+}
 
 /**
  * Generates a list of creative domain names based on a keyword using the Gemini API.
@@ -10,6 +22,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
  * @returns A promise that resolves to an array of objects, each with a domain name and a creative description.
  */
 export const generateDomains = async (keyword: string): Promise<{name: string, description: string}[]> => {
+  const ai = getAiClient(); // Get client instance here
   const prompt = `
     As a world-class branding expert and a savvy affiliate marketer, generate 21 creative and brandable domain names based on the concept: "${keyword}".
 
@@ -131,6 +144,7 @@ export const checkAvailability = async (domainName: string): Promise<DomainStatu
  * @returns A promise that resolves to a WhoisData object.
  */
 export const getWhoisInfo = async (domainName: string): Promise<WhoisData> => {
+  const ai = getAiClient(); // Get client instance here
   const prompt = `Generate realistic but fake WHOIS data for the registered domain "${domainName}". Provide data for registrar, creation date, expiration date, name servers, and domain status.`;
   
   const response = await ai.models.generateContent({
