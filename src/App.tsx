@@ -125,7 +125,7 @@ const App: React.FC = () => {
         </form>
         
         <div className="max-w-2xl mx-auto">
-          <AdsenseBlock slot="YOUR_AD_SLOT_ID" />
+          <AdsenseBlock slot="5928091834" />
         </div>
 
         {isLoading && (
