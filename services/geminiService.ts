@@ -1,15 +1,9 @@
+
 import { GoogleGenAI, Type } from '@google/genai';
 import type { WhoisData } from '../types';
 import { DomainStatus } from '../types';
 
-// ACTION REQUIRED: Your Gemini API key is now hardcoded here.
-const GEMINI_API_KEY = "AIzaSyDxOsoftRvgcYJrfnhLZISm2jZU0zGn7G4";
-
-if (!GEMINI_API_KEY) {
-  throw new Error("API_KEY environment variable is not set.");
-}
-
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 /**
  * Generates a list of creative domain names based on a keyword using the Gemini API.
@@ -152,7 +146,6 @@ export const getWhoisInfo = async (domainName: string): Promise<WhoisData> => {
           expirationDate: { type: Type.STRING, description: "ISO 8601 format date" },
           nameServers: {
             type: Type.ARRAY,
-            // FIX: Corrected typo from T to Type
             items: { type: Type.STRING },
             description: "e.g., ['ns1.domain.com', 'ns2.domain.com']"
           },
