@@ -65,11 +65,7 @@ const App: React.FC = () => {
     } catch (err) {
       console.error(err);
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      if (errorMessage.includes('VITE_GEMINI_API_KEY')) {
-        setWhoisData({ error: 'Configuration Error: The AI service is not set up correctly.' });
-      } else {
-        setWhoisData({ error: `Failed to fetch WHOIS data: ${errorMessage}` });
-      }
+      setWhoisData({ error: `Failed to fetch WHOIS data: ${errorMessage}` });
     } finally {
       setIsWhoisLoading(false);
     }
@@ -85,18 +81,16 @@ const App: React.FC = () => {
 
   const generateAffiliateLink = (domainName: string) => {
     // --- ACTION REQUIRED: ADD THIS VALUE TO YOUR ENVIRONMENT VARIABLES (.env file or hosting provider) ---
-    // Example for .env.local file:
-    // VITE_GODADDY_AFFILIATE_CODE=your_affiliate_code
-    const goDaddyAffiliateCode = process.env.GODADDY_AFFILIATE_CODE;
+    const nameSiloAffiliateCode = process.env.NAMESILO_AFFILIATE_CODE;
     
-    const deepLink = `https://www.godaddy.com/domains/searchresults.aspx?domainToCheck=${domainName}`;
+    const searchLink = `https://www.namesilo.com/domain/search-domains?query=${domainName}`;
     
-    // Append the affiliate code if it exists
-    if (goDaddyAffiliateCode) {
-        return `${deepLink}&isc=${goDaddyAffiliateCode}`;
+    // Append the affiliate code to the search link if it's provided
+    if (nameSiloAffiliateCode) {
+        return `${searchLink}&rid=${nameSiloAffiliateCode}`;
     }
     
-    return deepLink; // Fallback to non-affiliate link
+    return searchLink; // Fallback to non-affiliate search link
   };
 
   return (

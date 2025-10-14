@@ -42,7 +42,7 @@ export const DomainCard: React.FC<DomainCardProps> = ({ domain, isFavorite, onTo
         <div className="flex items-center gap-2">
             {domain.status === DomainStatus.Available ? (
             <button onClick={onBuy} className="w-full sm:w-auto px-6 py-2 bg-green-600 hover:bg-green-500 rounded-lg font-semibold transition-colors">
-                Secure on GoDaddy
+                Secure on NameSilo
             </button>
             ) : (
             <button onClick={onViewWhois} className="w-full sm:w-auto px-6 py-2 bg-blue-600/50 hover:bg-blue-600/80 rounded-lg font-semibold transition-colors">
@@ -53,7 +53,7 @@ export const DomainCard: React.FC<DomainCardProps> = ({ domain, isFavorite, onTo
                 <div className="relative group">
                     <InfoIcon className="h-5 w-5 text-gray-400 cursor-pointer" />
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-800 border border-white/20 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                        This opens GoDaddy with our affiliate link. If you make a purchase, we may earn a commission at no extra cost to you. Thank you for your support!
+                        This opens NameSilo with our affiliate link. If you make a purchase, we may earn a commission at no extra cost to you. Thank you for your support!
                         <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800"></div>
                     </div>
                 </div>

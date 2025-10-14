@@ -26,7 +26,7 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
   const prompt = `
     As a world-class branding expert and a savvy affiliate marketer, generate 21 creative and brandable domain names based on the concept: "${keyword}".
 
-    Your suggestions must be strategically optimized for high affiliate commissions on registrars like GoDaddy.
+    Your suggestions must be strategically optimized for high affiliate commissions on popular domain registrars.
     
     Naming Strategies:
     - Use evocative, metaphorical, portmanteau, and abstract naming styles.
@@ -86,51 +86,42 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
 };
 
 /**
- * Checks domain availability using the GoDaddy API.
+ * Checks domain availability using the WhoisXMLAPI.
  * @param domainName - The domain name to check.
  * @returns A promise that resolves to DomainStatus.
  */
 export const checkAvailability = async (domainName: string): Promise<DomainStatus> => {
-  // --- ACTION REQUIRED: ADD THESE VALUES TO YOUR ENVIRONMENT VARIABLES (.env file or hosting provider) ---
-  // Example for .env.local file:
-  // VITE_GODADDY_API_KEY=your_godaddy_api_key
-  // VITE_GODADDY_API_SECRET=your_godaddy_api_secret
-
-  const API_KEY = process.env.GODADDY_API_KEY;
-  const API_SECRET = process.env.GODADDY_API_SECRET;
+  const apiKey = 'at_r3gmzX6h7BWhsRcLyMAYNZJ1uQqsa';
   
-  // For testing, use the OTE (Operational Test Environment) URL. For production, change to 'https://api.godaddy.com'.
-  const API_ENDPOINT = 'https://api.ote-godaddy.com/v1/domains/available';
-
-  const url = `${API_ENDPOINT}?domain=${domainName}`;
+  // The `credits` parameter with `DA` checks only Domain Availability and consumes fewer credits.
+  const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domainName}&outputFormat=JSON&credits=DA`;
 
   try {
-    // If your API credentials are not set, the call will be skipped.
-    if (!API_KEY || !API_SECRET) {
-        console.warn("GoDaddy API credentials are not set in environment variables. Domain check is disabled.");
-        return DomainStatus.Unknown;
-    }
-      
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `sso-key ${API_KEY}:${API_SECRET}`
-      }
-    });
-    
+    const response = await fetch(url);
     if (!response.ok) {
-        console.error("GoDaddy API request failed:", response.status, response.statusText);
-        const errorBody = await response.json().catch(() => ({}));
-        console.error("Error details:", errorBody);
-        return DomainStatus.Unknown;
+      console.error(`WhoisXMLAPI request failed: ${response.status} ${response.statusText}`);
+      return DomainStatus.Unknown;
     }
-
     const data = await response.json();
+
+    if (data.ErrorMessage) {
+      console.error("WhoisXMLAPI error:", data.ErrorMessage.msg);
+      return DomainStatus.Unknown;
+    }
     
-    if (data.available) {
+    // The API returns `domainAvailability` as 'AVAILABLE' or 'UNAVAILABLE'
+    if (data.WhoisRecord?.domainAvailability === 'AVAILABLE') {
       return DomainStatus.Available;
-    } else {
+    } else if (data.WhoisRecord?.domainAvailability === 'UNAVAILABLE') {
       return DomainStatus.Taken;
     }
+    
+    // Fallback: if domainAvailability is missing, but we have registrar info, it's likely taken.
+    if (data.WhoisRecord?.registrarName) {
+        return DomainStatus.Taken;
+    }
+
+    return DomainStatus.Unknown;
   } catch (error) {
     console.error('Error checking domain availability:', error);
     return DomainStatus.Unknown;
@@ -139,39 +130,42 @@ export const checkAvailability = async (domainName: string): Promise<DomainStatu
 
 
 /**
- * Generates simulated WHOIS data for a given domain name using the Gemini API.
- * @param domainName - The domain for which to generate WHOIS data.
+ * Fetches real WHOIS data for a given domain name using the WhoisXMLAPI.
+ * @param domainName - The domain for which to fetch WHOIS data.
  * @returns A promise that resolves to a WhoisData object.
  */
 export const getWhoisInfo = async (domainName: string): Promise<WhoisData> => {
-  const ai = getAiClient(); // Get client instance here
-  const prompt = `Generate realistic but fake WHOIS data for the registered domain "${domainName}". Provide data for registrar, creation date, expiration date, name servers, and domain status.`;
-  
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          registrar: { type: Type.STRING, description: "e.g., GoDaddy, Namecheap" },
-          creationDate: { type: Type.STRING, description: "ISO 8601 format date" },
-          expirationDate: { type: Type.STRING, description: "ISO 8601 format date" },
-          nameServers: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "e.g., ['ns1.domain.com', 'ns2.domain.com']"
-          },
-          status: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "e.g., ['clientTransferProhibited', 'ok']"
-          }
-        }
-      }
-    }
-  });
+  const apiKey = 'at_r3gmzX6h7BWhsRcLyMAYNZJ1uQqsa';
 
-  return JSON.parse(response.text);
+  const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domainName}&outputFormat=JSON`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`WhoisXMLAPI request failed with status ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (data.ErrorMessage) {
+      return { error: data.ErrorMessage.msg };
+    }
+
+    const record = data.WhoisRecord;
+    if (!record) {
+      return { error: 'No WHOIS record found for this domain.' };
+    }
+    
+    return {
+      registrar: record.registrarName,
+      creationDate: record.createdDate,
+      expirationDate: record.expiresDate,
+      nameServers: record.nameServers?.hostNames,
+      // Status can be a single string; split it into an array for consistency
+      status: typeof record.status === 'string' ? record.status.split(' ') : record.status,
+    };
+  } catch (error) {
+    console.error("Error fetching WHOIS data:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+    return { error: `Failed to fetch WHOIS data: ${errorMessage}` };
+  }
 };
