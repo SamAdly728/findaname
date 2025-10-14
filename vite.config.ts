@@ -12,8 +12,11 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       // Expose environment variables to the client.
-      // IMPORTANT: You must set VITE_GEMINI_API_KEY in your deployment environment (e.g., on Render.com).
-      'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY)
+      // IMPORTANT: You must set these in your deployment environment (e.g., on Render.com).
+      'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
+      'process.env.GODADDY_API_KEY': JSON.stringify(env.VITE_GODADDY_API_KEY),
+      'process.env.GODADDY_API_SECRET': JSON.stringify(env.VITE_GODADDY_API_SECRET),
+      'process.env.GODADDY_AFFILIATE_CODE': JSON.stringify(env.VITE_GODADDY_AFFILIATE_CODE)
     }
   }
 })

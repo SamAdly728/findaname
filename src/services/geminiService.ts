@@ -78,12 +78,13 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
  * @returns A promise that resolves to DomainStatus.
  */
 export const checkAvailability = async (domainName: string): Promise<DomainStatus> => {
-  // --- ACTION REQUIRED: REPLACE PLACEHOLDERS WITH YOUR GODADDY CREDENTIALS ---
-  // 1. Get your API Key & Secret from the GoDaddy Developer Portal: https://developer.godaddy.com/keys
-  // 2. You may need to request production access for real-world use.
+  // --- ACTION REQUIRED: ADD THESE VALUES TO YOUR ENVIRONMENT VARIABLES (.env file or hosting provider) ---
+  // Example for .env.local file:
+  // VITE_GODADDY_API_KEY=your_godaddy_api_key
+  // VITE_GODADDY_API_SECRET=your_godaddy_api_secret
 
-  const API_KEY = 'your_godaddy_api_key';     // <-- PASTE your GoDaddy API Key here
-  const API_SECRET = 'your_godaddy_api_secret'; // <-- PASTE your GoDaddy API Secret here
+  const API_KEY = process.env.GODADDY_API_KEY;
+  const API_SECRET = process.env.GODADDY_API_SECRET;
   
   // For testing, use the OTE (Operational Test Environment) URL. For production, change to 'https://api.godaddy.com'.
   const API_ENDPOINT = 'https://api.ote-godaddy.com/v1/domains/available';
@@ -91,9 +92,9 @@ export const checkAvailability = async (domainName: string): Promise<DomainStatu
   const url = `${API_ENDPOINT}?domain=${domainName}`;
 
   try {
-    // If your API credentials are just placeholders, the call will be skipped.
-    if (API_KEY === 'your_godaddy_api_key' || API_SECRET === 'your_godaddy_api_secret') {
-        console.warn("GoDaddy API credentials are placeholders. Domain check is disabled.");
+    // If your API credentials are not set, the call will be skipped.
+    if (!API_KEY || !API_SECRET) {
+        console.warn("GoDaddy API credentials are not set in environment variables. Domain check is disabled.");
         return DomainStatus.Unknown;
     }
       

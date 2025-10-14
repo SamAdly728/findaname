@@ -73,15 +73,15 @@ const App: React.FC = () => {
   }, [setFavorites]);
 
   const generateAffiliateLink = (domainName: string) => {
-    // --- ACTION REQUIRED: REPLACE PLACEHOLDER WITH YOUR AFFILIATE CODE ---
-    // Sign up for a GoDaddy affiliate program (e.g., through CJ Affiliate) to get your code.
-    const goDaddyAffiliateCode = 'YOUR_AFFILIATE_CODE'; // <-- PASTE your affiliate tracking code here
+    // --- ACTION REQUIRED: ADD THIS VALUE TO YOUR ENVIRONMENT VARIABLES (.env file or hosting provider) ---
+    // Example for .env.local file:
+    // VITE_GODADDY_AFFILIATE_CODE=your_affiliate_code
+    const goDaddyAffiliateCode = process.env.GODADDY_AFFILIATE_CODE;
     
     const deepLink = `https://www.godaddy.com/domains/searchresults.aspx?domainToCheck=${domainName}`;
     
-    // This is a common structure, but might vary depending on the affiliate network (e.g., CJ.com)
-    // For CJ, it might look more complex. This is a simplified example.
-    if (goDaddyAffiliateCode !== 'YOUR_AFFILIATE_CODE') {
+    // Append the affiliate code if it exists
+    if (goDaddyAffiliateCode) {
         return `${deepLink}&isc=${goDaddyAffiliateCode}`;
     }
     
