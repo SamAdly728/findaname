@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get form elements
     const dnsForm = document.getElementById('dns-lookup-form');
     const whoisForm = document.getElementById('whois-lookup-form');
-    const downForm = document.getElementById('website-down-form');
+    const seoForm = document.getElementById('seo-checker-form');
 
     /**
      * Cleans user input to return a valid domain name.
@@ -22,14 +22,33 @@ document.addEventListener('DOMContentLoaded', () => {
         domain = domain.split('?')[0];
         return domain;
     };
+    
+    /**
+     * Validates and returns a full URL.
+     * @param {string} input - The user's input string.
+     * @returns {string|null} A valid URL or null.
+     */
+    const getValidUrl = (input) => {
+        if (!input) return null;
+        let url = input.trim();
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+        try {
+            new URL(url);
+            return url;
+        } catch (_) {
+            return null;
+        }
+    }
 
-    const showLoading = (container) => {
+    const showLoading = (container, text = 'Fetching data...') => {
         container.innerHTML = `
             <div class="flex flex-col items-center justify-center h-48">
                 <svg class="h-10 w-10 animate-spin text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
                 </svg>
-                <p class="mt-4 text-blue-200">Fetching data...</p>
+                <p class="mt-4 text-blue-200">${sanitizeHTML(text)}</p>
             </div>
         `;
     };
@@ -102,26 +121,32 @@ document.addEventListener('DOMContentLoaded', () => {
             renderWhoisAndHostingResults(resultsContainer, whoisData, hostingData);
         });
     }
-
-    // --- WEBSITE DOWN CHECKER (FIXED with api.downfor.cloud) ---
-    if (downForm) {
-        downForm.addEventListener('submit', async (e) => {
+    
+    // --- SEO CHECKER ---
+    if (seoForm) {
+        seoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const domain = sanitizeDomain(downForm.querySelector('input').value);
-            if (!domain) return;
+            const url = getValidUrl(seoForm.querySelector('input').value);
+            if (!url) {
+                renderError(document.getElementById('results-container'), 'Please enter a valid URL (e.g., https://example.com)');
+                return;
+            }
             const resultsContainer = document.getElementById('results-container');
-            showLoading(resultsContainer);
+            showLoading(resultsContainer, 'Analyzing site... This may take a minute.');
+            
+            const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO`;
             
             try {
-                const response = await fetch(`https://api.downfor.cloud/httpcheck/${domain}`);
+                const response = await fetch(apiUrl);
                 if (!response.ok) {
-                    throw new Error('Status check service returned an error.');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error.message || `API request failed with status ${response.status}`);
                 }
                 const data = await response.json();
-                renderIsItDownResults(resultsContainer, data, domain);
+                renderSeoResults(resultsContainer, data);
             } catch (error) {
-                const message = error instanceof Error ? error.message : 'An unknown network error occurred.';
-                renderError(resultsContainer, `Could not check status: ${message}`);
+                 const message = error instanceof Error ? error.message : 'An unknown network error occurred.';
+                renderError(resultsContainer, `Could not analyze site: ${message}`);
             }
         });
     }
@@ -225,26 +250,73 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     };
     
-    const renderIsItDownResults = (container, data, domain) => {
-        let statusClass, statusText, description;
+    const renderSeoResults = (container, data) => {
+        const results = data.lighthouseResult;
+        const categories = results.categories;
+        const audits = results.audits;
+        
+        const screenshot = audits['final-screenshot']?.details?.data;
 
-        if (data.success && data.result.is_online) {
-            statusClass = 'bg-green-500/20 text-green-300';
-            statusText = 'UP and running';
-            description = `The website appears to be online and accessible. Response time: ${data.result.response.response_time}ms.`;
-        } else {
-            statusClass = 'bg-red-500/20 text-red-300';
-            statusText = 'DOWN';
-            description = data.error?.message || 'The website seems to be offline or is not responding.';
-        }
+        const scoreCard = (title, score) => {
+            const scoreNum = Math.round(score * 100);
+            let colorClass = 'text-green-300';
+            if (scoreNum < 90) colorClass = 'text-yellow-300';
+            if (scoreNum < 50) colorClass = 'text-red-400';
             
-        container.innerHTML = `
-            <div class="${statusClass} p-6 rounded-lg text-center">
-                <h3 class="text-3xl font-bold">
-                    ${sanitizeHTML(domain)} is <span class="uppercase">${statusText}</span>
-                </h3>
-                <p class="mt-2">${description}</p>
+            return `
+                <div class="bg-white/10 p-4 rounded-lg text-center">
+                    <div class="text-4xl font-bold ${colorClass}">${scoreNum}</div>
+                    <div class="text-sm text-blue-200/80 mt-1">${title}</div>
+                </div>
+            `;
+        };
+        
+        const auditCheckItem = (auditId, text) => {
+            const audit = audits[auditId];
+            if (!audit) return '';
+            const pass = audit.score === 1;
+            const icon = pass
+              ? '<svg class="w-5 h-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>'
+              : '<svg class="w-5 h-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>';
+            
+            return `<li class="flex items-center gap-3">${icon} <span class="text-blue-100/90">${text}</span></li>`;
+        };
+
+        let html = `
+            <div class="space-y-6">
+                ${screenshot ? `
+                    <div>
+                        <h2 class="text-2xl font-bold text-blue-200 mb-3 text-center">Homepage Screenshot</h2>
+                        <img src="${screenshot}" alt="Website Screenshot" class="rounded-lg border-2 border-white/20 mx-auto shadow-lg" />
+                    </div>
+                ` : ''}
+
+                <div>
+                    <h2 class="text-2xl font-bold text-blue-200 mb-3 text-center">Core Web Vitals & SEO Scores</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        ${scoreCard('Performance', categories.performance.score)}
+                        ${scoreCard('Accessibility', categories.accessibility.score)}
+                        ${scoreCard('Best Practices', categories['best-practices'].score)}
+                        ${scoreCard('SEO', categories.seo.score)}
+                    </div>
+                </div>
+                
+                <div>
+                    <h2 class="text-2xl font-bold text-blue-200 mb-3 text-center">On-Page SEO Checklist</h2>
+                    <div class="bg-white/10 p-4 rounded-lg">
+                        <ul class="space-y-2">
+                            ${auditCheckItem('document-title', 'Has a Title Tag')}
+                            ${auditCheckItem('meta-description', 'Has a Meta Description')}
+                            ${auditCheckItem('viewport', 'Is Mobile Friendly (Viewport Tag)')}
+                            ${auditCheckItem('image-alt', 'All Images Have Alt Attributes')}
+                            ${auditCheckItem('crawlable-links', 'Links are Crawlable')}
+                            ${auditCheckItem('is-crawlable', 'Page is Crawlable (Not Blocked by robots.txt)')}
+                        </ul>
+                    </div>
+                </div>
             </div>
         `;
+        
+        container.innerHTML = html;
     };
 });
