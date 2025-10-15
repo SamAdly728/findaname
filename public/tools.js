@@ -118,19 +118,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // --- HOSTING LOOKUP ---
+    // --- HOSTING LOOKUP (REWORKED) ---
     if (hostingForm) {
         hostingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const domain = sanitizeDomain(hostingForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            const url = `https://website-hosting.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}`;
-            const data = await fetchDataWithApiKey(url, resultsContainer);
-            if (data) {
-                renderHostingResults(resultsContainer, data, domain);
-            } else {
-                 renderError(resultsContainer, `Could not fetch hosting data. This may be due to an invalid domain or an API key subscription issue for the Hosting Lookup service.`);
+            showLoading(resultsContainer);
+
+            try {
+                // Step 1: Get IP address from domain using Google Public DNS API.
+                const dnsResponse = await fetch(`https://dns.google/resolve?name=${domain}&type=A`);
+                if (!dnsResponse.ok) throw new Error('Failed to query DNS records.');
+                
+                const dnsData = await dnsResponse.json();
+                const aRecord = dnsData?.Answer?.find(rec => rec.type === 1);
+
+                if (!aRecord || !aRecord.data) {
+                    throw new Error(`Could not resolve an IP address for "${domain}". The domain may not exist or lacks an A record.`);
+                }
+                const ipAddress = aRecord.data;
+
+                // Step 2: Use the IP address to find hosting details from a free IP info API.
+                const ipApiResponse = await fetch(`http://ip-api.com/json/${ipAddress}`);
+                if (!ipApiResponse.ok) throw new Error('Failed to query IP information service.');
+
+                const ipApiData = await ipApiResponse.json();
+                if (ipApiData.status === 'fail') {
+                    throw new Error(`Could not get hosting details for IP ${ipAddress}. Reason: ${ipApiData.message}`);
+                }
+                
+                // Step 3: Render the combined results.
+                const displayData = {
+                    "Domain": domain,
+                    "IP Address": ipAddress,
+                    "Hosting Provider (ISP)": ipApiData.isp,
+                    "Organization": ipApiData.org,
+                    "Location": `${ipApiData.city}, ${ipApiData.country}`,
+                };
+
+                let html = '<div class="space-y-2">';
+                for (const [key, value] of Object.entries(displayData)) {
+                    if (value) {
+                        html += `
+                            <div class="flex flex-col sm:flex-row border-b border-white/10 pb-2">
+                                <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitizeHTML(key)}:</dt>
+                                <dd class="w-full sm:w-2/3 text-blue-100 break-words">${sanitizeHTML(value)}</dd>
+                            </div>
+                        `;
+                    }
+                }
+                html += '</div>';
+                resultsContainer.innerHTML = html;
+
+            } catch (err) {
+                const message = err instanceof Error ? err.message : 'An unknown error occurred.';
+                renderError(resultsContainer, message);
+                console.error("Hosting Lookup Error:", err);
             }
         });
     }
@@ -219,32 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
             html += `<li class="p-2 bg-white/10 rounded">${sanitizeHTML(ns)}</li>`;
         });
         html += '</ul>';
-        container.innerHTML = html;
-    };
-
-    const renderHostingResults = (container, data, domain) => {
-        if (!data?.hostings || data.hostings.length === 0) {
-             return renderError(container, `Could not determine hosting provider for ${sanitizeHTML(domain)}.`);
-        }
-        const hostingInfo = data.hostings[0];
-        const displayData = {
-            "Domain": domain,
-            "Hosting Provider": hostingInfo.isp,
-            "IP Address": hostingInfo.ip,
-            "Country": hostingInfo.country,
-        };
-        let html = '<div class="space-y-2">';
-        for (const [key, value] of Object.entries(displayData)) {
-            if (value) {
-                html += `
-                    <div class="flex flex-col sm:flex-row border-b border-white/10 pb-2">
-                        <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitizeHTML(key)}:</dt>
-                        <dd class="w-full sm:w-2/3 text-blue-100 break-words">${sanitizeHTML(value)}</dd>
-                    </div>
-                `;
-            }
-        }
-        html += '</div>';
         container.innerHTML = html;
     };
     
