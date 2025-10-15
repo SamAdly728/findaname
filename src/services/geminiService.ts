@@ -89,32 +89,30 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
 };
 
 /**
- * Checks domain availability using the WhoisXMLAPI. This is a reliable, CORS-enabled API.
+ * Checks domain availability by performing a WHOIS lookup.
+ * If a WHOIS record exists, the domain is taken. If not, it's likely available.
+ * This is more reliable than using a separate availability API which might not be covered by the user's subscription.
  * @param domainName - The domain name to check.
  * @returns A promise that resolves to DomainStatus.
  */
 export const checkAvailability = async (domainName: string): Promise<DomainStatus> => {
-  const apiUrl = `https://domain-availability.whoisxmlapi.com/api/v1?apiKey=${WHOISXML_API_KEY}&domainName=${domainName}`;
-
   try {
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error(`WhoisXMLAPI availability check failed for ${domainName}:`, response.status, errorData);
-        return DomainStatus.Unknown;
-    }
-    const data = await response.json();
-
-    if (data?.DomainInfo?.domainAvailability === 'AVAILABLE') {
-      return DomainStatus.Available;
-    }
-    if (data?.DomainInfo?.domainAvailability === 'UNAVAILABLE') {
+    const whoisData = await getWhoisInfo(domainName);
+    
+    // If a creation date exists, the domain is definitely taken.
+    if (whoisData.creationDate) {
       return DomainStatus.Taken;
     }
-
+    
+    // If the API returns a specific error indicating no record was found, it's likely available.
+    if (whoisData.error && whoisData.error.includes('No WHOIS record found')) {
+      return DomainStatus.Available;
+    }
+    
+    // Any other error or an empty response without a creation date means the status is uncertain.
     return DomainStatus.Unknown;
   } catch (error) {
-    console.error(`Error checking domain availability for ${domainName}:`, error);
+    console.error(`Error checking availability via WHOIS for ${domainName}:`, error);
     return DomainStatus.Unknown;
   }
 };
