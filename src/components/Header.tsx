@@ -13,6 +13,7 @@ export const Header: React.FC = () => {
             <a href="/dns-lookup.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">DNS Lookup</a>
             <a href="/whois-lookup.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
             <a href="/seo-checker.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">SEO Checker</a>
+            <a href="/domain-value-calculator.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">Domain Value</a>
         </nav>
         {/* This empty div helps to perfectly center the nav items in the space between the logo and the edge */}
         <div className="w-24 hidden md:block"></div>

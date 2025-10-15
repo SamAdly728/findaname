@@ -1,3 +1,5 @@
+import { GoogleGenAI, Type } from 'https://aistudiocdn.com/@google/genai@^1.24.0';
+
 document.addEventListener('DOMContentLoaded', () => {
     // This key was provided in a previous turn for WhoisXMLAPI services.
     const apiKey = 'at_r3gmzX6h7BWhsRcLyMAYNZJ1uQqsa';
@@ -6,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dnsForm = document.getElementById('dns-lookup-form');
     const whoisForm = document.getElementById('whois-lookup-form');
     const seoForm = document.getElementById('seo-checker-form');
+    const domainValueForm = document.getElementById('domain-value-form');
+
 
     /**
      * Cleans user input to return a valid domain name.
@@ -71,14 +75,39 @@ document.addEventListener('DOMContentLoaded', () => {
             const domain = sanitizeDomain(dnsForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            const url = `https://dns.google/resolve?name=${domain}&type=ANY`;
             showLoading(resultsContainer);
+
+            const recordTypesToQuery = ['A', 'AAAA', 'MX', 'TXT', 'NS', 'CNAME', 'SOA'];
+            const promises = recordTypesToQuery.map(type => 
+                fetch(`https://dns.google/resolve?name=${domain}&type=${type}`)
+            );
+
             try {
-                const response = await fetch(url);
-                const data = await response.json();
-                renderGoogleDnsResults(resultsContainer, data);
+                const responses = await Promise.allSettled(promises);
+                let allAnswers = [];
+
+                for (const response of responses) {
+                    if (response.status === 'fulfilled') {
+                        if (response.value.ok) {
+                            const data = await response.value.json();
+                            if (data && data.Answer) {
+                                allAnswers = allAnswers.concat(data.Answer);
+                            }
+                        }
+                    } else {
+                        console.error('A DNS fetch promise was rejected:', response.reason);
+                    }
+                }
+
+                if (allAnswers.length > 0) {
+                    renderGoogleDnsResults(resultsContainer, { Answer: allAnswers });
+                } else {
+                    renderError(resultsContainer, 'No DNS records found for this domain.');
+                }
+
             } catch (err) {
-                renderError(resultsContainer, 'Failed to fetch DNS data.');
+                console.error('DNS Lookup Error:', err);
+                renderError(resultsContainer, 'Failed to fetch DNS data due to a network error.');
             }
         });
     }
@@ -126,20 +155,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (seoForm) {
         seoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const url = getValidUrl(seoForm.querySelector('input').value);
+            const url = getValidUrl(document.getElementById('seo-url-input').value);
+            const userApiKey = document.getElementById('api-key-input').value.trim();
+            const resultsContainer = document.getElementById('results-container');
+
             if (!url) {
-                renderError(document.getElementById('results-container'), 'Please enter a valid URL (e.g., https://example.com)');
+                renderError(resultsContainer, 'Please enter a valid URL (e.g., https://example.com)');
                 return;
             }
-            const resultsContainer = document.getElementById('results-container');
+
+            if (!userApiKey) {
+                renderError(resultsContainer, 'Please enter your Google PageSpeed API Key to use this tool.');
+                return;
+            }
+            
             showLoading(resultsContainer, 'Analyzing site... This may take a minute.');
             
-            const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO`;
+            const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO&key=${userApiKey}`;
             
             try {
                 const response = await fetch(apiUrl);
                 if (!response.ok) {
                     const errorData = await response.json();
+                    if (errorData.error && errorData.error.message.includes('API key not valid')) {
+                        throw new Error('The provided API key is not valid. Please check it and try again.');
+                    }
                     throw new Error(errorData.error.message || `API request failed with status ${response.status}`);
                 }
                 const data = await response.json();
@@ -147,6 +187,96 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                  const message = error instanceof Error ? error.message : 'An unknown network error occurred.';
                 renderError(resultsContainer, `Could not analyze site: ${message}`);
+            }
+        });
+    }
+
+    // --- DOMAIN VALUE CALCULATOR ---
+    if (domainValueForm) {
+        domainValueForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const domain = sanitizeDomain(document.getElementById('domain-value-input').value);
+            const userApiKey = document.getElementById('gemini-api-key-input').value.trim();
+            const resultsContainer = document.getElementById('results-container');
+
+            if (!domain) {
+                renderError(resultsContainer, 'Please enter a valid domain name.');
+                return;
+            }
+            if (!userApiKey) {
+                renderError(resultsContainer, 'Please enter your Google AI (Gemini) API Key.');
+                return;
+            }
+
+            showLoading(resultsContainer, 'Appraising domain with AI...');
+
+            try {
+                // 1. Fetch WHOIS data for context
+                const whoisUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
+                const whoisResponse = await fetch(whoisUrl);
+                const whoisData = await whoisResponse.json();
+                const record = whoisData?.WhoisRecord;
+                const domainAge = record?.createdDate ? 
+                    `${((new Date() - new Date(record.createdDate)) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1)} years` : 
+                    'new';
+
+                // 2. Call Gemini API with context
+                const ai = new GoogleGenAI({ apiKey: userApiKey });
+                const prompt = `
+                    Act as a professional domain name appraiser. I will provide you with a domain name and its age. 
+                    Your task is to provide an estimated value in USD and a brief analysis.
+
+                    Domain: "${domain}"
+                    Age: ${domainAge}
+
+                    Analyze the domain based on the following factors:
+                    - TLD (Top-Level Domain, e.g., .com, .io, .ai)
+                    - Length and memorability
+                    - Keyword relevance and commercial intent
+                    - Brandability and uniqueness
+                    - Age of the domain
+
+                    Provide your response in a valid JSON format according to the schema.
+                `;
+
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: prompt,
+                    config: {
+                      responseMimeType: 'application/json',
+                      responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                          estimatedValue: {
+                            type: Type.NUMBER,
+                            description: 'The estimated value of the domain in USD. Provide a single number.'
+                          },
+                          summary: {
+                            type: Type.STRING,
+                            description: 'A one or two-sentence summary explaining the valuation.'
+                          },
+                          positiveFactors: {
+                            type: Type.ARRAY,
+                            items: { type: Type.STRING },
+                            description: 'A list of key positive points affecting the value.'
+                          },
+                          negativeFactors: {
+                            type: Type.ARRAY,
+                            items: { type: Type.STRING },
+                            description: 'A list of key negative points affecting the value.'
+                          }
+                        },
+                        required: ['estimatedValue', 'summary', 'positiveFactors', 'negativeFactors']
+                      }
+                    }
+                  });
+
+                const valuationData = JSON.parse(response.text);
+                renderDomainValueResults(resultsContainer, valuationData);
+
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+                renderError(resultsContainer, `Could not evaluate domain: ${message}`);
             }
         });
     }
@@ -317,6 +447,41 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         
+        container.innerHTML = html;
+    };
+
+    const renderDomainValueResults = (container, data) => {
+        const formattedValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(data.estimatedValue);
+        
+        const factorList = (title, factors, colorClass) => {
+            if (!factors || factors.length === 0) return '';
+            return `
+                <div>
+                    <h4 class="text-lg font-semibold ${colorClass} mb-2">${title}</h4>
+                    <ul class="list-disc list-inside space-y-1 text-blue-200/90">
+                        ${factors.map(f => `<li>${sanitizeHTML(f)}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        let html = `
+            <div class="space-y-6">
+                <div class="text-center">
+                    <p class="text-lg text-blue-200/80">AI Estimated Value</p>
+                    <p class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-teal-200 py-2">${formattedValue}</p>
+                </div>
+                <div class="bg-white/10 p-4 rounded-lg">
+                    <h3 class="text-xl font-bold text-blue-200 mb-2">Valuation Summary</h3>
+                    <p class="text-blue-100/90">${sanitizeHTML(data.summary)}</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${factorList('Positive Factors', data.positiveFactors, 'text-green-400')}
+                    ${factorList('Negative Factors', data.negativeFactors, 'text-red-400')}
+                </div>
+                <p class="text-xs text-center text-blue-200/60 mt-4">Disclaimer: This is an AI-generated estimate and not a formal appraisal. Actual market value may vary.</p>
+            </div>
+        `;
         container.innerHTML = html;
     };
 });
