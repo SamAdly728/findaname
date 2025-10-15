@@ -73,14 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- DNS LOOKUP (using Google Public DNS) ---
+    // --- DNS LOOKUP (ENHANCED to fetch multiple record types) ---
     if (dnsForm) {
         dnsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const domain = sanitizeDomain(dnsForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            const url = `https://dns.google/resolve?name=${domain}`;
+            // By requesting type=ANY, we get all available common record types.
+            const url = `https://dns.google/resolve?name=${domain}&type=ANY`;
             showLoading(resultsContainer);
             try {
                 const response = await fetch(url);
@@ -128,32 +129,20 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoading(resultsContainer);
 
             try {
-                // Step 1: Get IP address from domain using Google Public DNS API.
-                const dnsResponse = await fetch(`https://dns.google/resolve?name=${domain}&type=A`);
-                if (!dnsResponse.ok) throw new Error('Failed to query DNS records.');
-                
-                const dnsData = await dnsResponse.json();
-                const aRecord = dnsData?.Answer?.find(rec => rec.type === 1);
-
-                if (!aRecord || !aRecord.data) {
-                    throw new Error(`Could not resolve an IP address for "${domain}". The domain may not exist or lacks an A record.`);
-                }
-                const ipAddress = aRecord.data;
-
-                // Step 2: Use the IP address to find hosting details from a free IP info API.
-                // FIXED: Changed from http to https to prevent mixed-content errors.
-                const ipApiResponse = await fetch(`https://ip-api.com/json/${ipAddress}?fields=status,message,country,regionName,city,timezone,isp,org,as,query`);
+                // Using a single, reliable API that accepts a domain name directly.
+                // This is more robust as it removes the dependency on a separate DNS lookup first.
+                const ipApiResponse = await fetch(`https://ip-api.com/json/${domain}?fields=status,message,country,regionName,city,timezone,isp,org,as,query`);
                 if (!ipApiResponse.ok) throw new Error('Failed to query IP information service.');
 
                 const ipApiData = await ipApiResponse.json();
                 if (ipApiData.status === 'fail') {
-                    throw new Error(`Could not get hosting details for IP ${ipAddress}. Reason: ${ipApiData.message}`);
+                    throw new Error(`Could not get hosting details for "${domain}". Reason: ${ipApiData.message || 'Invalid domain'}.`);
                 }
                 
-                // Step 3: Render the combined results.
+                // Render the combined results.
                 const displayData = {
                     "Domain": domain,
-                    "IP Address": ipAddress,
+                    "IP Address": ipApiData.query,
                     "Hosting Provider (ISP)": ipApiData.isp,
                     "Organization": ipApiData.org,
                     "AS Number / Name": ipApiData.as,
@@ -183,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- WEBSITE DOWN CHECKER (FIXED with reliable API) ---
+    // --- WEBSITE DOWN CHECKER (FIXED with more reliable API) ---
     if (downForm) {
         downForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -193,13 +182,13 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoading(resultsContainer);
             
             try {
-                // Using a reliable, free, CORS-enabled API for checking site status.
-                const response = await fetch(`https://isitup.org/${domain}.json`);
+                // Using a different, reliable, CORS-enabled API for checking site status.
+                const response = await fetch(`https://api.downfor.cloud/httpcheck/${domain}`);
                 if (!response.ok) {
-                    throw new Error('Status check service is currently unavailable.');
+                    throw new Error('Status check service is currently unavailable or the domain is invalid.');
                 }
                 const data = await response.json();
-                renderWebsiteDownResults(resultsContainer, data);
+                renderWebsiteDownResults(resultsContainer, data, domain);
             } catch (error) {
                 const message = error instanceof Error ? error.message : 'An unknown network error occurred.';
                 renderError(resultsContainer, `Could not check status: ${message}`);
@@ -208,22 +197,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     const renderGoogleDnsResults = (container, data) => {
-        const recordTypes = { 1: 'A', 2: 'NS', 5: 'CNAME', 6: 'SOA', 15: 'MX', 16: 'TXT', 28: 'AAAA' };
+        // More extensive list of common DNS record types.
+        const recordTypes = { 1: 'A', 2: 'NS', 5: 'CNAME', 6: 'SOA', 15: 'MX', 16: 'TXT', 28: 'AAAA', 33: 'SRV', 43: 'DS', 257: 'CAA' };
         if (!data || !data.Answer || data.Answer.length === 0) {
             return renderError(container, 'No DNS records found for this domain.');
         }
         let html = '<div class="space-y-4">';
-        data.Answer.forEach(rec => {
-            html += `
-                <div class="p-3 bg-white/10 rounded-lg">
-                    <div class="flex justify-between items-center">
-                      <strong class="text-blue-300 font-semibold">${sanitizeHTML(recordTypes[rec.type] || `Type ${rec.type}`)}</strong>
-                      <span class="text-xs text-blue-200/60">TTL: ${sanitizeHTML(rec.TTL)}</span>
+        // Group records by type for better readability
+        const recordsByType = data.Answer.reduce((acc, rec) => {
+            const typeName = recordTypes[rec.type] || `Type ${rec.type}`;
+            if (!acc[typeName]) {
+                acc[typeName] = [];
+            }
+            acc[typeName].push(rec);
+            return acc;
+        }, {});
+
+        for (const typeName in recordsByType) {
+            html += `<h3 class="text-xl font-bold text-blue-200 mt-4 -mb-2">${typeName} Records</h3>`;
+            recordsByType[typeName].forEach(rec => {
+                 html += `
+                    <div class="p-3 bg-white/10 rounded-lg">
+                        <div class="flex justify-between items-center">
+                          <strong class="text-blue-300 font-semibold">${sanitizeHTML(rec.name)}</strong>
+                          <span class="text-xs text-blue-200/60">TTL: ${sanitizeHTML(rec.TTL)}</span>
+                        </div>
+                        <div class="pl-4 mt-1 text-blue-100/90 break-words">${sanitizeHTML(rec.data)}</div>
                     </div>
-                    <div class="pl-4 mt-1 text-blue-100/90 break-words">${sanitizeHTML(rec.data)}</div>
-                </div>
-            `;
-        });
+                `;
+            });
+        }
+
         html += '</div>';
         container.innerHTML = html;
     };
@@ -299,25 +303,19 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     };
     
-    const renderWebsiteDownResults = (container, data) => {
-        // status_code 1 = up, 2 = down, 3 = invalid
-        const isUp = data.status_code === 1;
-        const isInvalid = data.status_code === 3;
+    const renderWebsiteDownResults = (container, data, domain) => {
+        const isDown = data.is_down;
 
-        if (isInvalid) {
-            return renderError(container, `"${sanitizeHTML(data.domain)}" does not appear to be a valid domain.`);
-        }
-
-        const statusClass = isUp ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300';
-        const statusText = isUp ? 'UP and running' : 'DOWN';
-        const description = isUp 
-            ? `The website is online and responded with code ${data.response_code} in ${data.response_time} seconds.`
+        const statusClass = !isDown ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300';
+        const statusText = !isDown ? 'UP and running' : 'DOWN';
+        const description = !isDown 
+            ? `The website appears to be online and accessible from our servers.`
             : 'The website seems to be offline from our check. It might be down for everyone.';
             
         container.innerHTML = `
             <div class="${statusClass} p-6 rounded-lg text-center">
                 <h3 class="text-3xl font-bold">
-                    ${sanitizeHTML(data.domain)} is <span class="uppercase">${statusText}</span>
+                    ${sanitizeHTML(domain)} is <span class="uppercase">${statusText}</span>
                 </h3>
                 <p class="mt-2">${description}</p>
             </div>
