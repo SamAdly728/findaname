@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // --- HOSTING LOOKUP (REWORKED & FIXED) ---
+    // --- HOSTING LOOKUP (FIXED with ipinfo.io) ---
     if (hostingForm) {
         hostingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -129,31 +129,27 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoading(resultsContainer);
 
             try {
-                // Using a single, reliable API that accepts a domain name directly.
-                // This is more robust as it removes the dependency on a separate DNS lookup first.
-                const ipApiResponse = await fetch(`https://ip-api.com/json/${domain}?fields=status,message,country,regionName,city,timezone,isp,org,as,query`);
-                if (!ipApiResponse.ok) throw new Error('Failed to query IP information service.');
+                const ipInfoResponse = await fetch(`https://ipinfo.io/${domain}/json`);
+                if (!ipInfoResponse.ok) throw new Error('Failed to query the hosting information service.');
 
-                const ipApiData = await ipApiResponse.json();
-                if (ipApiData.status === 'fail') {
-                    throw new Error(`Could not get hosting details for "${domain}". Reason: ${ipApiData.message || 'Invalid domain'}.`);
+                const ipInfoData = await ipInfoResponse.json();
+                if (ipInfoData.error) {
+                    throw new Error(ipInfoData.error.message || `Could not get hosting details for "${domain}".`);
                 }
                 
-                // Render the combined results.
                 const displayData = {
                     "Domain": domain,
-                    "IP Address": ipApiData.query,
-                    "Hosting Provider (ISP)": ipApiData.isp,
-                    "Organization": ipApiData.org,
-                    "AS Number / Name": ipApiData.as,
-                    "Location": `${ipApiData.city}, ${ipApiData.regionName}, ${ipApiData.country}`,
-                    "Timezone": ipApiData.timezone
+                    "IP Address": ipInfoData.ip,
+                    "Hosting Provider (ISP)": ipInfoData.org,
+                    "Hostname": ipInfoData.hostname,
+                    "Location": [ipInfoData.city, ipInfoData.region, ipInfoData.country].filter(Boolean).join(', '),
+                    "Timezone": ipInfoData.timezone,
                 };
 
                 let html = '<div class="space-y-2">';
                 for (const [key, value] of Object.entries(displayData)) {
                     if (value) {
-                        html += `
+                         html += `
                             <div class="flex flex-col sm:flex-row border-b border-white/10 pb-2">
                                 <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitizeHTML(key)}:</dt>
                                 <dd class="w-full sm:w-2/3 text-blue-100 break-words">${sanitizeHTML(value)}</dd>
@@ -172,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- WEBSITE DOWN CHECKER (FIXED with more reliable API) ---
+    // --- WEBSITE DOWN CHECKER (FIXED with isitup.org API) ---
     if (downForm) {
         downForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -182,13 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoading(resultsContainer);
             
             try {
-                // Using a different, reliable, CORS-enabled API for checking site status.
-                const response = await fetch(`https://api.downfor.cloud/httpcheck/${domain}`);
+                // Using the reliable isitup.org API.
+                const response = await fetch(`https://isitup.org/${domain}.json`);
                 if (!response.ok) {
-                    throw new Error('Status check service is currently unavailable or the domain is invalid.');
+                    throw new Error('Status check service is currently unavailable.');
                 }
                 const data = await response.json();
-                renderWebsiteDownResults(resultsContainer, data, domain);
+                renderIsItUpResults(resultsContainer, data);
             } catch (error) {
                 const message = error instanceof Error ? error.message : 'An unknown network error occurred.';
                 renderError(resultsContainer, `Could not check status: ${message}`);
@@ -303,14 +299,21 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     };
     
-    const renderWebsiteDownResults = (container, data, domain) => {
-        const isDown = data.is_down;
+    const renderIsItUpResults = (container, data) => {
+        const { domain, status_code, response_time } = data;
+        let statusClass, statusText, description;
 
-        const statusClass = !isDown ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300';
-        const statusText = !isDown ? 'UP and running' : 'DOWN';
-        const description = !isDown 
-            ? `The website appears to be online and accessible from our servers.`
-            : 'The website seems to be offline from our check. It might be down for everyone.';
+        if (status_code === 1) { // Site is up
+            statusClass = 'bg-green-500/20 text-green-300';
+            statusText = 'UP and running';
+            description = `The website appears to be online and accessible from our servers. Response time: ${response_time}s.`;
+        } else if (status_code === 2) { // Site is down
+            statusClass = 'bg-red-500/20 text-red-300';
+            statusText = 'DOWN';
+            description = 'The website seems to be offline from our check. It might be down for everyone.';
+        } else { // Invalid domain
+            return renderError(container, `Could not check "${domain}". It does not appear to be a valid domain.`);
+        }
             
         container.innerHTML = `
             <div class="${statusClass} p-6 rounded-lg text-center">
