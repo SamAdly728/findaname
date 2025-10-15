@@ -138,8 +138,9 @@ const App: React.FC = () => {
     const nameSiloAffiliateCode = 'a5fe41269e066dfef064e';
     const encodedDomain = encodeURIComponent(domainName);
     
-    // This link directs the user to the search result page with the domain pre-filled.
-    const searchLink = `https://www.namesilo.com/domain/search?query=${encodedDomain}`;
+    // CORRECTED: The path for domain search on NameSilo is '/domain/search-domains'.
+    // The previous path '/domain/search' was incorrect and caused a 404 error.
+    const searchLink = `https://www.namesilo.com/domain/search-domains?query=${encodedDomain}`;
     
     if (nameSiloAffiliateCode) {
         return `${searchLink}&rid=${nameSiloAffiliateCode}`;
