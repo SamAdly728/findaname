@@ -2,6 +2,9 @@ import { GoogleGenAI, Type } from '@google/genai';
 import type { WhoisData } from '../types';
 import { DomainStatus } from '../types';
 
+// Using the provided WhoisXMLAPI key for reliable, CORS-enabled checks.
+const WHOISXML_API_KEY = 'at_r3gmzX6h7BWhsRcLyMAYNZJ1uQqsa';
+
 /**
  * Lazily initializes and returns the GoogleGenAI client.
  * Throws an error if the API key is not available in the environment variables.
@@ -86,48 +89,35 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
 };
 
 /**
- * Checks domain availability using the WhoisXMLAPI.
+ * Checks domain availability using the WhoisXMLAPI. This is a reliable, CORS-enabled API.
  * @param domainName - The domain name to check.
  * @returns A promise that resolves to DomainStatus.
  */
 export const checkAvailability = async (domainName: string): Promise<DomainStatus> => {
-  const apiKey = 'at_r3gmzX6h7BWhsRcLyMAYNZJ1uQqsa';
-  
-  // The `credits` parameter with `DA` checks only Domain Availability and consumes fewer credits.
-  const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domainName}&outputFormat=JSON&credits=DA`;
+  const apiUrl = `https://domain-availability.whoisxmlapi.com/api/v1?apiKey=${WHOISXML_API_KEY}&domainName=${domainName}`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(apiUrl);
     if (!response.ok) {
-      console.error(`WhoisXMLAPI request failed: ${response.status} ${response.statusText}`);
-      return DomainStatus.Unknown;
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`WhoisXMLAPI availability check failed for ${domainName}:`, response.status, errorData);
+        return DomainStatus.Unknown;
     }
     const data = await response.json();
 
-    if (data.ErrorMessage) {
-      console.error("WhoisXMLAPI error:", data.ErrorMessage.msg);
-      return DomainStatus.Unknown;
-    }
-    
-    // The API returns `domainAvailability` as 'AVAILABLE' or 'UNAVAILABLE'
-    if (data.WhoisRecord?.domainAvailability === 'AVAILABLE') {
+    if (data?.DomainInfo?.domainAvailability === 'AVAILABLE') {
       return DomainStatus.Available;
-    } else if (data.WhoisRecord?.domainAvailability === 'UNAVAILABLE') {
-      return DomainStatus.Taken;
     }
-    
-    // Fallback: if domainAvailability is missing, but we have registrar info, it's likely taken.
-    if (data.WhoisRecord?.registrarName) {
-        return DomainStatus.Taken;
+    if (data?.DomainInfo?.domainAvailability === 'UNAVAILABLE') {
+      return DomainStatus.Taken;
     }
 
     return DomainStatus.Unknown;
   } catch (error) {
-    console.error('Error checking domain availability:', error);
+    console.error(`Error checking domain availability for ${domainName}:`, error);
     return DomainStatus.Unknown;
   }
 };
-
 
 /**
  * Fetches real WHOIS data for a given domain name using the WhoisXMLAPI.
@@ -135,37 +125,37 @@ export const checkAvailability = async (domainName: string): Promise<DomainStatu
  * @returns A promise that resolves to a WhoisData object.
  */
 export const getWhoisInfo = async (domainName: string): Promise<WhoisData> => {
-  const apiKey = 'at_r3gmzX6h7BWhsRcLyMAYNZJ1uQqsa';
-
-  const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domainName}&outputFormat=JSON`;
+  const apiUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${WHOISXML_API_KEY}&domainName=${domainName}&outputFormat=JSON`;
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`WhoisXMLAPI request failed with status ${response.status}`);
+    const response = await fetch(apiUrl);
+     if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`WhoisXMLAPI WHOIS fetch failed for ${domainName}:`, response.status, errorData);
+        const errorMessage = errorData.ErrorMessage?.msg || `API request failed with status ${response.status}`;
+        return { error: errorMessage };
     }
     const data = await response.json();
 
     if (data.ErrorMessage) {
-      return { error: data.ErrorMessage.msg };
+        return { error: data.ErrorMessage.msg };
     }
 
     const record = data.WhoisRecord;
     if (!record || !record.createdDate) {
-      return { error: 'No WHOIS record found for this domain. It might be available!' };
+         return { error: 'No WHOIS record found for this domain. It might be available!' };
     }
     
     return {
       registrar: record.registrarName,
       creationDate: record.createdDate,
       expirationDate: record.expiresDate,
-      nameServers: record.nameServers?.hostNames,
-      // Status can be a single string; split it into an array for consistency
-      status: typeof record.status === 'string' ? record.status.split(' ') : record.status,
+      nameServers: record.nameServers?.hostNames || [],
+      status: record.status?.split(' ') || [],
     };
   } catch (error) {
-    console.error("Error fetching WHOIS data:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+    console.error(`Error fetching WHOIS data from WhoisXMLAPI for ${domainName}:`, error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown network error occurred.";
     return { error: `Failed to fetch WHOIS data: ${errorMessage}` };
   }
 };

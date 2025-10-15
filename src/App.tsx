@@ -1,12 +1,13 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { DomainCard } from './components/DomainCard';
 import { WhoisModal } from './components/WhoisModal';
 import { AdsenseBlock } from './components/AdsenseBlock';
+import { ProgressBar } from './components/ProgressBar';
 import { generateDomains, checkAvailability, getWhoisInfo } from './services/geminiService';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import type { DomainInfo, WhoisData, DomainStatus } from './types';
+import type { DomainInfo, WhoisData } from './types';
 import { SearchIcon, LoaderIcon } from './components/icons/Icons';
 
 const App: React.FC = () => {
@@ -21,6 +22,45 @@ const App: React.FC = () => {
   const [whoisData, setWhoisData] = useState<WhoisData | null>(null);
   const [isWhoisLoading, setIsWhoisLoading] = useState<boolean>(false);
 
+  const [progress, setProgress] = useState(0);
+  const [progressText, setProgressText] = useState('');
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  const loadingMessages = [
+    'Brewing creative ideas...',
+    'Consulting the digital oracle...',
+    'Searching across the web...',
+    'Checking TLD availability...',
+    'Analyzing brand potential...',
+    'Polishing domain gems...',
+    'Uncovering hidden domains...',
+    'Finalizing suggestions...'
+  ];
+
+  useEffect(() => {
+    let interval: number;
+    if (isLoading) {
+      setProgressText(loadingMessages[0]);
+      interval = window.setInterval(() => {
+        setProgressText(prevText => {
+          const currentIndex = loadingMessages.indexOf(prevText);
+          const nextIndex = (currentIndex + 1) % loadingMessages.length;
+          return loadingMessages[nextIndex];
+        });
+      }, 1200);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    // Scroll after the first few results are in, not just at the end
+    if (domains.length > 0 && domains.length < 5) {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [domains.length]);
+
   const handleSearch = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!keyword.trim()) {
@@ -31,19 +71,32 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setDomains([]);
+    setProgress(0);
+    setProgressText(loadingMessages[0]);
 
     try {
       const generatedDomains = await generateDomains(keyword);
-      const availabilityChecks = generatedDomains.map(async (domain) => {
+      if (generatedDomains.length === 0) {
+        setError("The AI couldn't generate domains for this keyword. Try something else!");
+        setIsLoading(false);
+        return;
+      }
+      
+      let processedDomains: DomainInfo[] = [];
+      for (let i = 0; i < generatedDomains.length; i++) {
+        const domain = generatedDomains[i];
         const status = await checkAvailability(domain.name);
-        return { name: domain.name, status, description: domain.description };
-      });
-      const results = await Promise.all(availabilityChecks);
-      setDomains(results);
+        const newDomainInfo = { name: domain.name, status, description: domain.description };
+        
+        processedDomains = [...processedDomains, newDomainInfo];
+        setDomains(processedDomains);
+        
+        setProgress(((i + 1) / generatedDomains.length) * 100);
+      }
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       console.error(err);
-      // Provide a more helpful message for the most common deployment error.
       if (errorMessage.includes('VITE_GEMINI_API_KEY')) {
         setError('Configuration Error: The AI service is not set up correctly.');
       } else {
@@ -80,18 +133,18 @@ const App: React.FC = () => {
   }, [setFavorites]);
 
   const generateAffiliateLink = (domainName: string) => {
-    // --- ACTION REQUIRED: ADD THIS VALUE TO YOUR ENVIRONMENT VARIABLES ---
-    // e.g., in a .env.local file: VITE_NAMESILO_AFFILIATE_CODE=a5fe41269e066dfef064e
-    const nameSiloAffiliateCode = process.env.NAMESILO_AFFILIATE_CODE;
+    // The user has requested to use 'a5fe41269e066dfef064e' for NameSilo affiliate links.
+    // This value will be used as the affiliate ID ('rid').
+    const nameSiloAffiliateCode = 'a5fe41269e066dfef064e';
     
+    // This link directs the user to the registration page with the domain pre-filled.
     const searchLink = `https://www.namesilo.com/register.php?domain=${domainName}`;
     
-    // Append the affiliate code (rid) to the search link if it's provided.
-    if (nameSiloAffiliateCode && nameSiloAffiliateCode !== 'undefined') {
+    if (nameSiloAffiliateCode) {
         return `${searchLink}&rid=${nameSiloAffiliateCode}`;
     }
     
-    return searchLink; // Fallback to non-affiliate search link
+    return searchLink;
   };
 
   return (
@@ -132,33 +185,38 @@ const App: React.FC = () => {
           {error && <p className="text-red-400 text-center mt-2">{error}</p>}
         </form>
         
+        {isLoading && (
+          <ProgressBar progress={progress} text={progressText} />
+        )}
+
         <div className="max-w-2xl mx-auto">
           <AdsenseBlock slot="5928091834" />
         </div>
-
-        {isLoading && (
-          <div className="text-center py-10">
-            <div className="inline-block">
-                <LoaderIcon className="h-12 w-12 animate-spin text-blue-400" />
+        
+        <div ref={resultsRef}>
+          {!isLoading && domains.length > 0 && (
+            <div className="text-center my-6">
+              <h2 className="text-2xl font-semibold text-blue-200">
+                Found {domains.length} creative domains for you:
+              </h2>
             </div>
-            <p className="mt-4 text-lg text-blue-200">Checking availability...</p>
-          </div>
-        )}
+          )}
 
-        {domains.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {domains.map((domain) => (
-              <DomainCard
-                key={domain.name}
-                domain={domain}
-                isFavorite={favorites.includes(domain.name)}
-                onToggleFavorite={() => handleToggleFavorite(domain.name)}
-                onViewWhois={() => handleViewWhois(domain)}
-                onBuy={() => window.open(generateAffiliateLink(domain.name), '_blank', 'noopener,noreferrer')}
-              />
-            ))}
-          </div>
-        )}
+          {domains.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {domains.map((domain) => (
+                <DomainCard
+                  key={domain.name}
+                  domain={domain}
+                  isFavorite={favorites.includes(domain.name)}
+                  onToggleFavorite={() => handleToggleFavorite(domain.name)}
+                  onViewWhois={() => handleViewWhois(domain)}
+                  onBuy={() => window.open(generateAffiliateLink(domain.name), '_blank', 'noopener,noreferrer')}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
       {isModalOpen && selectedDomain && (

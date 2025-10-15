@@ -13,8 +13,7 @@ export default defineConfig(({ mode }) => {
     define: {
       // Expose environment variables to the client.
       // IMPORTANT: You must set these in your deployment environment (e.g., on Render.com).
-      'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
-      'process.env.NAMESILO_AFFILIATE_CODE': JSON.stringify(env.VITE_NAMESILO_AFFILIATE_CODE)
+      'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY)
     }
   }
 })
