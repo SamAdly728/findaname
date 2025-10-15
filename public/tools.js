@@ -7,6 +7,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const hostingForm = document.getElementById('hosting-lookup-form');
     const downForm = document.getElementById('website-down-form');
 
+    /**
+     * Cleans user input to return a valid domain name.
+     * Removes protocols, 'www.', and paths.
+     * @param {string} input - The user's input string.
+     * @returns {string} A sanitized domain name.
+     */
+    const sanitizeDomain = (input) => {
+        if (!input) return '';
+        let domain = input.trim();
+        // Remove protocol
+        domain = domain.replace(/^(https?:\/\/)?/i, '');
+        // Remove www.
+        domain = domain.replace(/^(www\.)?/i, '');
+        // Remove path
+        domain = domain.split('/')[0];
+        return domain;
+    };
+
     const showLoading = (container) => {
         container.innerHTML = `
             <div class="flex flex-col items-center justify-center h-48">
@@ -22,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = `<div class="text-center text-red-400 bg-red-500/10 p-4 rounded-lg">${message}</div>`;
     };
     
-    const sanitize = (str) => {
+    const sanitizeHTML = (str) => {
         if (str === null || str === undefined) return '';
         const temp = document.createElement('div');
         temp.textContent = str.toString();
@@ -48,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dnsForm) {
         dnsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const domain = dnsForm.querySelector('input').value.trim();
+            const domain = sanitizeDomain(dnsForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
             const url = `https://dns.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}&type=_all`;
@@ -60,10 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (whoisForm) {
         whoisForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const domain = whoisForm.querySelector('input').value.trim();
+            const domain = sanitizeDomain(whoisForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            const url = `https://www.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}`;
+            const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
             const data = await fetchData(url, resultsContainer);
             if (data) renderWhoisResults(resultsContainer, data);
         });
@@ -72,10 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nsForm) {
         nsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const domain = nsForm.querySelector('input').value.trim();
+            const domain = sanitizeDomain(nsForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            const url = `https://www.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}`;
+            const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
             const data = await fetchData(url, resultsContainer);
             if (data) renderNameserverResults(resultsContainer, data);
         });
@@ -84,22 +102,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hostingForm) {
         hostingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const domain = hostingForm.querySelector('input').value.trim();
+            const domain = sanitizeDomain(hostingForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
             
-            // Step 1: Get IP address from DNS A record
             const dnsUrl = `https://dns.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}&type=A`;
             const dnsData = await fetchData(dnsUrl, resultsContainer);
 
             if (dnsData?.DNSData?.dnsRecords?.[0]?.address) {
                 const ipAddress = dnsData.DNSData.dnsRecords[0].address;
-                // Step 2: Get IP Geolocation/ISP info
                 const geoUrl = `https://ip-geolocation.whoisxmlapi.com/api/v1?apiKey=${apiKey}&ipAddress=${ipAddress}`;
                 const geoData = await fetchData(geoUrl, resultsContainer);
                 if (geoData) renderHostingResults(resultsContainer, geoData, domain, ipAddress);
             } else {
-                 renderError(resultsContainer, `Could not resolve an IP address for ${sanitize(domain)}.`);
+                 renderError(resultsContainer, `Could not resolve an IP address for ${sanitizeHTML(domain)}.`);
             }
         });
     }
@@ -107,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (downForm) {
         downForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const domain = downForm.querySelector('input').value.trim();
+            const domain = sanitizeDomain(downForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
             const url = `https://website-status.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}`;
@@ -125,8 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const value = rec.address || rec.target || rec.value || rec.name || JSON.stringify(rec);
             html += `
                 <div class="p-3 bg-white/10 rounded-lg">
-                    <strong class="text-blue-300 font-semibold">${sanitize(rec.type)}</strong>
-                    <div class="pl-4 text-blue-100/90 break-words">${sanitize(value)}</div>
+                    <strong class="text-blue-300 font-semibold">${sanitizeHTML(rec.type)}</strong>
+                    <div class="pl-4 text-blue-100/90 break-words">${sanitizeHTML(value)}</div>
                 </div>
             `;
         });
@@ -136,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderWhoisResults = (container, data) => {
         const record = data?.WhoisRecord;
-        if (!record) {
+        if (!record || !record.createdDate) {
             return renderError(container, 'No WHOIS record found. The domain might be available.');
         }
         const displayData = {
@@ -154,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (value && value.replace(/<br>/g, '').trim()) {
                 html += `
                     <div class="flex flex-col sm:flex-row border-b border-white/10 pb-2">
-                        <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitize(key)}:</dt>
+                        <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitizeHTML(key)}:</dt>
                         <dd class="w-full sm:w-2/3 text-blue-100 break-words">${value}</dd> <!-- No sanitization for value to allow <br> -->
                     </div>
                 `;
@@ -170,11 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return renderError(container, 'No nameservers found for this domain.');
         }
         let html = `
-            <h3 class="text-xl font-bold text-blue-200 mb-4">Nameservers for ${sanitize(data.WhoisRecord.domainName)}:</h3>
+            <h3 class="text-xl font-bold text-blue-200 mb-4">Nameservers for ${sanitizeHTML(data.WhoisRecord.domainName)}:</h3>
             <ul class="list-disc list-inside space-y-2">
         `;
         nameservers.forEach(ns => {
-            html += `<li class="p-2 bg-white/10 rounded">${sanitize(ns)}</li>`;
+            html += `<li class="p-2 bg-white/10 rounded">${sanitizeHTML(ns)}</li>`;
         });
         html += '</ul>';
         container.innerHTML = html;
@@ -182,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderHostingResults = (container, data, domain, ip) => {
         if (!data?.isp) {
-             return renderError(container, `Could not determine hosting provider for ${sanitize(domain)}.`);
+             return renderError(container, `Could not determine hosting provider for ${sanitizeHTML(domain)}.`);
         }
         const displayData = {
             "Domain": domain,
@@ -196,8 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (value) {
                 html += `
                     <div class="flex flex-col sm:flex-row border-b border-white/10 pb-2">
-                        <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitize(key)}:</dt>
-                        <dd class="w-full sm:w-2/3 text-blue-100 break-words">${sanitize(value)}</dd>
+                        <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitizeHTML(key)}:</dt>
+                        <dd class="w-full sm:w-2/3 text-blue-100 break-words">${sanitizeHTML(value)}</dd>
                     </div>
                 `;
             }
@@ -213,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = `
             <div class="${statusClass} p-6 rounded-lg text-center">
                 <h3 class="text-3xl font-bold">
-                    ${sanitize(domain)} is <span class="uppercase">${statusText}</span>
+                    ${sanitizeHTML(domain)} is <span class="uppercase">${statusText}</span>
                 </h3>
                 ${isUp ? `<p class="mt-2">The website appears to be online from our location. Response time: ${data.responseTimeMs}ms</p>` : `<p class="mt-2">We were unable to connect to the website. It might be down for everyone.</p>`}
             </div>
