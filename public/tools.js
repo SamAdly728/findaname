@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ipAddress = aRecord.data;
 
                 // Step 2: Use the IP address to find hosting details from a free IP info API.
-                const ipApiResponse = await fetch(`http://ip-api.com/json/${ipAddress}`);
+                const ipApiResponse = await fetch(`http://ip-api.com/json/${ipAddress}?fields=status,message,country,regionName,city,timezone,isp,org,as,query`);
                 if (!ipApiResponse.ok) throw new Error('Failed to query IP information service.');
 
                 const ipApiData = await ipApiResponse.json();
@@ -155,7 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     "IP Address": ipAddress,
                     "Hosting Provider (ISP)": ipApiData.isp,
                     "Organization": ipApiData.org,
-                    "Location": `${ipApiData.city}, ${ipApiData.country}`,
+                    "AS Number / Name": ipApiData.as,
+                    "Location": `${ipApiData.city}, ${ipApiData.regionName}, ${ipApiData.country}`,
+                    "Timezone": ipApiData.timezone
                 };
 
                 let html = '<div class="space-y-2">';
@@ -213,8 +215,11 @@ document.addEventListener('DOMContentLoaded', () => {
         data.Answer.forEach(rec => {
             html += `
                 <div class="p-3 bg-white/10 rounded-lg">
-                    <strong class="text-blue-300 font-semibold">${sanitizeHTML(recordTypes[rec.type] || `Type ${rec.type}`)}</strong>
-                    <div class="pl-4 text-blue-100/90 break-words">${sanitizeHTML(rec.data)}</div>
+                    <div class="flex justify-between items-center">
+                      <strong class="text-blue-300 font-semibold">${sanitizeHTML(recordTypes[rec.type] || `Type ${rec.type}`)}</strong>
+                      <span class="text-xs text-blue-200/60">TTL: ${sanitizeHTML(rec.TTL)}</span>
+                    </div>
+                    <div class="pl-4 mt-1 text-blue-100/90 break-words">${sanitizeHTML(rec.data)}</div>
                 </div>
             `;
         });
@@ -222,31 +227,57 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     };
 
+    const renderDataItem = (label, value) => {
+        if (!value || (Array.isArray(value) && value.length === 0)) return '';
+        const displayValue = Array.isArray(value) ? value.join('<br>') : sanitizeHTML(value);
+        return `
+            <div class="flex flex-col sm:flex-row border-b border-white/10 py-2">
+                <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitizeHTML(label)}:</dt>
+                <dd class="w-full sm:w-2/3 text-blue-100 break-words">${displayValue}</dd> 
+            </div>
+        `;
+    };
+
+    const renderContactBlock = (title, contact) => {
+        if (!contact) return '';
+        const addressParts = [contact.street, contact.city, contact.state, contact.postalCode, contact.country].filter(Boolean);
+        let html = `<h3 class="text-xl font-bold text-blue-200 mt-6 mb-2">${title}</h3><div class="space-y-0">`;
+        html += renderDataItem('Name', contact.name);
+        html += renderDataItem('Organization', contact.organization);
+        if (addressParts.length > 0) {
+            html += renderDataItem('Address', addressParts.join(', '));
+        }
+        html += renderDataItem('Phone', contact.telephone);
+        html += renderDataItem('Email', contact.email);
+        html += '</div>';
+        return html;
+    };
+
     const renderWhoisResults = (container, data) => {
         const record = data?.WhoisRecord;
         if (!record || !record.createdDate) {
             return renderError(container, 'No WHOIS record found. The domain might be available.');
         }
-        const displayData = {
-            "Domain Name": record.domainName,
-            "Registrar": record.registrarName,
-            "Creation Date": record.createdDate ? new Date(record.createdDate).toDateString() : 'N/A',
-            "Expiration Date": record.expiresDate ? new Date(record.expiresDate).toDateString() : 'N/A',
-            "Updated Date": record.updatedDate ? new Date(record.updatedDate).toDateString() : 'N/A',
-            "Status": Array.isArray(record.status) ? record.status.join(', ') : record.status,
-            "Name Servers": record.nameServers?.hostNames?.join('<br>'),
-        };
-        let html = '<div class="space-y-2">';
-        for (const [key, value] of Object.entries(displayData)) {
-            if (value && value.replace(/<br>/g, '').trim()) {
-                html += `
-                    <div class="flex flex-col sm:flex-row border-b border-white/10 pb-2">
-                        <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitizeHTML(key)}:</dt>
-                        <dd class="w-full sm:w-2/3 text-blue-100 break-words">${value}</dd> 
-                    </div>
-                `;
-            }
-        }
+        
+        let html = '<div class="space-y-0">';
+
+        html += '<h3 class="text-xl font-bold text-blue-200 mb-2">Domain Information</h3>';
+        html += renderDataItem('Domain', record.domainName);
+        html += renderDataItem('Registered On', record.createdDate ? new Date(record.createdDate).toUTCString() : 'N/A');
+        html += renderDataItem('Expires On', record.expiresDate ? new Date(record.expiresDate).toUTCString() : 'N/A');
+        html += renderDataItem('Updated On', record.updatedDate ? new Date(record.updatedDate).toUTCString() : 'N/A');
+        html += renderDataItem('Status', record.status);
+        html += renderDataItem('Name Servers', record.nameServers?.hostNames);
+        
+        html += '<h3 class="text-xl font-bold text-blue-200 mt-6 mb-2">Registrar Information</h3>';
+        html += renderDataItem('Registrar', record.registrarName);
+        html += renderDataItem('IANA ID', record.registrarIANAID);
+        html += renderDataItem('Abuse Email', record.contactEmail); // often the registrar's abuse contact
+        
+        html += renderContactBlock('Registrant Contact', record.registrant);
+        html += renderContactBlock('Administrative Contact', record.administrativeContact);
+        html += renderContactBlock('Technical Contact', record.technicalContact);
+
         html += '</div>';
         container.innerHTML = html;
     };
