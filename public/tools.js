@@ -1,8 +1,10 @@
 import { GoogleGenAI, Type } from 'https://aistudiocdn.com/@google/genai@^1.24.0';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // This key was provided in a previous turn for WhoisXMLAPI services.
-    const apiKey = 'at_r3gmzX6h7BWhsRcLyMAYNZJ1uQqsa';
+    // This key was provided for WhoisXMLAPI services.
+    const whoisApiKey = 'at_r3gmzX6h7BWhsRcLyMAYNZJ1uQqsa';
+    // This key was provided for the Google PageSpeed Insights API.
+    const pagespeedApiKey = 'AIzaSyACR1q0kDI1iPAs8OwN-kwqHwTZ7U7a258';
 
     // Get form elements
     const dnsForm = document.getElementById('dns-lookup-form');
@@ -121,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const resultsContainer = document.getElementById('results-container');
             showLoading(resultsContainer);
 
-            const whoisUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
+            const whoisUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${whoisApiKey}&domainName=${domain}&outputFormat=JSON`;
             const hostingUrl = `https://ipinfo.io/${domain}/json`;
 
             const [whoisResponse, hostingResponse] = await Promise.allSettled([
@@ -155,23 +157,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (seoForm) {
         seoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const url = getValidUrl(document.getElementById('seo-url-input').value);
-            const userApiKey = document.getElementById('api-key-input').value.trim();
+            const url = getValidUrl(seoForm.querySelector('input').value);
             const resultsContainer = document.getElementById('results-container');
 
             if (!url) {
                 renderError(resultsContainer, 'Please enter a valid URL (e.g., https://example.com)');
                 return;
             }
-
-            if (!userApiKey) {
-                renderError(resultsContainer, 'Please enter your Google PageSpeed API Key to use this tool.');
-                return;
-            }
             
             showLoading(resultsContainer, 'Analyzing site... This may take a minute.');
             
-            const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO&key=${userApiKey}`;
+            const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO&key=${pagespeedApiKey}`;
             
             try {
                 const response = await fetch(apiUrl);
@@ -179,6 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errorData = await response.json();
                     if (errorData.error && errorData.error.message.includes('API key not valid')) {
                         throw new Error('The provided API key is not valid. Please check it and try again.');
+                    }
+                     if (errorData.error && errorData.error.message.includes('Quota exceeded')) {
+                        throw new Error('The daily analysis quota for this tool has been reached. Please try again tomorrow.');
                     }
                     throw new Error(errorData.error.message || `API request failed with status ${response.status}`);
                 }
@@ -196,15 +195,18 @@ document.addEventListener('DOMContentLoaded', () => {
         domainValueForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const domain = sanitizeDomain(document.getElementById('domain-value-input').value);
-            const userApiKey = document.getElementById('gemini-api-key-input').value.trim();
             const resultsContainer = document.getElementById('results-container');
+
+            // IMPORTANT: The user requested to use a single, shared API key for this public tool.
+            // This is generally not recommended for security reasons, but implemented as requested.
+            const geminiApiKey = 'AIzaSyDxOsoftRvgcYJrfnhLZISm2jZU0zGn7G4';
 
             if (!domain) {
                 renderError(resultsContainer, 'Please enter a valid domain name.');
                 return;
             }
-            if (!userApiKey) {
-                renderError(resultsContainer, 'Please enter your Google AI (Gemini) API Key.');
+            if (!geminiApiKey) { // Failsafe check
+                renderError(resultsContainer, 'The application is not configured with an API Key.');
                 return;
             }
 
@@ -212,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // 1. Fetch WHOIS data for context
-                const whoisUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
+                const whoisUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${whoisApiKey}&domainName=${domain}&outputFormat=JSON`;
                 const whoisResponse = await fetch(whoisUrl);
                 const whoisData = await whoisResponse.json();
                 const record = whoisData?.WhoisRecord;
@@ -221,10 +223,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     'new';
 
                 // 2. Call Gemini API with context
-                const ai = new GoogleGenAI({ apiKey: userApiKey });
+                const ai = new GoogleGenAI({ apiKey: geminiApiKey });
                 const prompt = `
                     Act as a professional domain name appraiser. I will provide you with a domain name and its age. 
-                    Your task is to provide an estimated value in USD and a brief analysis.
+                    Your task is to provide an estimated value in USD and a detailed analysis.
 
                     Domain: "${domain}"
                     Age: ${domainAge}
@@ -264,9 +266,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             type: Type.ARRAY,
                             items: { type: Type.STRING },
                             description: 'A list of key negative points affecting the value.'
-                          }
+                          },
+                           valuationConfidence: { 
+                                type: Type.STRING, 
+                                description: 'Confidence level of the valuation. Must be one of: Low, Medium, High.' 
+                            },
+                            recommendedAction: { 
+                                type: Type.STRING, 
+                                description: 'A brief recommended action (e.g., "Strong Buy", "Hold for negotiation", "Monitor").' 
+                            },
+                            monetizationStrategies: {
+                                type: Type.ARRAY,
+                                items: { type: Type.STRING },
+                                description: 'A list of 2-3 potential monetization strategies for this domain (e.g., "Affiliate marketing site", "SaaS platform", "Lead generation portal").'
+                            }
                         },
-                        required: ['estimatedValue', 'summary', 'positiveFactors', 'negativeFactors']
+                        required: ['estimatedValue', 'summary', 'positiveFactors', 'negativeFactors', 'valuationConfidence', 'recommendedAction', 'monetizationStrategies']
                       }
                     }
                   });
@@ -384,82 +399,126 @@ document.addEventListener('DOMContentLoaded', () => {
         const results = data.lighthouseResult;
         const categories = results.categories;
         const audits = results.audits;
-        
         const screenshot = audits['final-screenshot']?.details?.data;
 
-        const scoreCard = (title, score) => {
+        const createScoreDonut = (title, score) => {
             const scoreNum = Math.round(score * 100);
-            let colorClass = 'text-green-300';
-            if (scoreNum < 90) colorClass = 'text-yellow-300';
-            if (scoreNum < 50) colorClass = 'text-red-400';
-            
+            let strokeColor = '#4ade80'; // green-400
+            if (scoreNum < 90) strokeColor = '#facc15'; // yellow-400
+            if (scoreNum < 50) strokeColor = '#f87171'; // red-400
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (scoreNum / 100) * circumference;
+
             return `
-                <div class="bg-white/10 p-4 rounded-lg text-center">
-                    <div class="text-4xl font-bold ${colorClass}">${scoreNum}</div>
-                    <div class="text-sm text-blue-200/80 mt-1">${title}</div>
+                <div class="flex flex-col items-center">
+                    <div class="relative w-28 h-28">
+                        <svg class="w-full h-full" viewBox="0 0 100 100">
+                            <circle class="text-white/10" stroke-width="10" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50" />
+                            <circle stroke-width="10" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round" stroke="${strokeColor}" fill="transparent" r="45" cx="50" cy="50" transform="rotate(-90 50 50)" />
+                        </svg>
+                        <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold" style="color: ${strokeColor};">${scoreNum}</span>
+                    </div>
+                    <p class="mt-2 text-sm font-semibold text-blue-200/90">${sanitizeHTML(title)}</p>
                 </div>
             `;
         };
-        
-        const auditCheckItem = (auditId, text) => {
-            const audit = audits[auditId];
-            if (!audit) return '';
-            const pass = audit.score === 1;
-            const icon = pass
-              ? '<svg class="w-5 h-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>'
-              : '<svg class="w-5 h-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>';
-            
-            return `<li class="flex items-center gap-3">${icon} <span class="text-blue-100/90">${text}</span></li>`;
+
+        const createVitalsCard = (metricId, title) => {
+            const metric = audits[metricId];
+            if (!metric) return '';
+            const value = metric.displayValue;
+            const score = metric.score;
+            let colorClass = 'text-green-400';
+            if (score < 0.9 && score >= 0.5) colorClass = 'text-yellow-400';
+            if (score < 0.5) colorClass = 'text-red-400';
+            return `
+                <div class="bg-white/5 p-4 rounded-lg">
+                    <p class="text-sm text-blue-200/70">${sanitizeHTML(title)}</p>
+                    <p class="text-2xl font-bold ${colorClass}">${sanitizeHTML(value)}</p>
+                </div>
+            `;
+        };
+
+        const createIssuesList = (title, auditRefs) => {
+            if (!auditRefs || auditRefs.length === 0) return '';
+            let itemsHtml = '';
+            for (const ref of auditRefs) {
+                if (ref.weight > 0 && audits[ref.id] && audits[ref.id].score !== null && audits[ref.id].score < 0.9) {
+                    const audit = audits[ref.id];
+                    const description = audit.description ? audit.description.replace(/\[Learn more\]\(.*\)/g, '') : '';
+                    itemsHtml += `
+                        <li class="flex items-start gap-3 p-3 bg-white/5 rounded-md">
+                            <svg class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.636-1.21 2.852-1.21 3.488 0l6.237 11.917c.616 1.176-.23 2.65-1.57 2.825H3.592c-1.34-.175-2.186-1.649-1.57-2.825L8.257 3.099zM10 13a1 1 0 100-2 1 1 0 000 2zm-1-4a1 1 0 011-1h.008a1 1 0 011 1v2.007a1 1 0 01-1 1h-.008a1 1 0 01-1-1V9z" clip-rule="evenodd" /></svg>
+                            <div>
+                                <p class="font-semibold text-blue-100">${sanitizeHTML(audit.title)}</p>
+                                <p class="text-sm text-blue-200/80">${sanitizeHTML(description)}</p>
+                            </div>
+                        </li>
+                    `;
+                }
+            }
+            if (itemsHtml === '') return `<div><h3 class="text-xl font-bold text-blue-200 mb-3">${title}</h3><p class="text-green-400">✅ No major issues found!</p></div>`;
+            return `
+                <div>
+                    <h3 class="text-xl font-bold text-blue-200 mb-3">${title}</h3>
+                    <ul class="space-y-2">${itemsHtml}</ul>
+                </div>
+            `;
         };
 
         let html = `
-            <div class="space-y-6">
-                ${screenshot ? `
-                    <div>
-                        <h2 class="text-2xl font-bold text-blue-200 mb-3 text-center">Homepage Screenshot</h2>
-                        <img src="${screenshot}" alt="Website Screenshot" class="rounded-lg border-2 border-white/20 mx-auto shadow-lg" />
-                    </div>
-                ` : ''}
-
-                <div>
-                    <h2 class="text-2xl font-bold text-blue-200 mb-3 text-center">Core Web Vitals & SEO Scores</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        ${scoreCard('Performance', categories.performance.score)}
-                        ${scoreCard('Accessibility', categories.accessibility.score)}
-                        ${scoreCard('Best Practices', categories['best-practices'].score)}
-                        ${scoreCard('SEO', categories.seo.score)}
-                    </div>
-                </div>
-                
-                <div>
-                    <h2 class="text-2xl font-bold text-blue-200 mb-3 text-center">On-Page SEO Checklist</h2>
-                    <div class="bg-white/10 p-4 rounded-lg">
-                        <ul class="space-y-2">
-                            ${auditCheckItem('document-title', 'Has a Title Tag')}
-                            ${auditCheckItem('meta-description', 'Has a Meta Description')}
-                            ${auditCheckItem('viewport', 'Is Mobile Friendly (Viewport Tag)')}
-                            ${auditCheckItem('image-alt', 'All Images Have Alt Attributes')}
-                            ${auditCheckItem('crawlable-links', 'Links are Crawlable')}
-                            ${auditCheckItem('is-crawlable', 'Page is Crawlable (Not Blocked by robots.txt)')}
-                        </ul>
+            <div class="space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    ${screenshot ? `
+                        <div>
+                            <h2 class="text-2xl font-bold text-blue-200 mb-3 text-center lg:text-left">Homepage Screenshot</h2>
+                            <img src="${screenshot}" alt="Website Screenshot" class="rounded-lg border-2 border-white/20 mx-auto shadow-lg" />
+                        </div>
+                    ` : ''}
+                    <div class="flex flex-col items-center">
+                        <h2 class="text-2xl font-bold text-blue-200 mb-4 text-center">Overall Scores</h2>
+                        <div class="grid grid-cols-2 gap-x-8 gap-y-6">
+                            ${createScoreDonut('Performance', categories.performance.score)}
+                            ${createScoreDonut('Accessibility', categories.accessibility.score)}
+                            ${createScoreDonut('Best Practices', categories['best-practices'].score)}
+                            ${createScoreDonut('SEO', categories.seo.score)}
+                        </div>
                     </div>
                 </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-blue-200 mb-3 text-center">Core Web Vitals</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        ${createVitalsCard('largest-contentful-paint', 'Largest Contentful Paint (LCP)')}
+                        ${createVitalsCard('cumulative-layout-shift', 'Cumulative Layout Shift (CLS)')}
+                        ${createVitalsCard('total-blocking-time', 'Total Blocking Time (TBT)')}
+                    </div>
+                </div>
+                ${createIssuesList('SEO Opportunities & Issues', categories.seo.auditRefs)}
+                ${createIssuesList('Performance Opportunities', categories.performance.auditRefs)}
+                ${createIssuesList('Accessibility Issues', categories.accessibility.auditRefs)}
             </div>
         `;
-        
         container.innerHTML = html;
     };
+
 
     const renderDomainValueResults = (container, data) => {
         const formattedValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(data.estimatedValue);
         
-        const factorList = (title, factors, colorClass) => {
+        const confidenceClasses = {
+            'High': 'bg-green-500/20 text-green-300',
+            'Medium': 'bg-yellow-500/20 text-yellow-300',
+            'Low': 'bg-red-500/20 text-red-300',
+        };
+        const confidenceClass = confidenceClasses[data.valuationConfidence] || 'bg-gray-500/20 text-gray-300';
+        
+        const factorList = (title, factors, icon) => {
             if (!factors || factors.length === 0) return '';
             return `
                 <div>
-                    <h4 class="text-lg font-semibold ${colorClass} mb-2">${title}</h4>
-                    <ul class="list-disc list-inside space-y-1 text-blue-200/90">
-                        ${factors.map(f => `<li>${sanitizeHTML(f)}</li>`).join('')}
+                    <h4 class="text-lg font-semibold text-blue-200 mb-2 flex items-center gap-2">${icon} ${title}</h4>
+                    <ul class="list-none space-y-2 text-blue-200/90 pl-2">
+                        ${factors.map(f => `<li class="flex items-start gap-2"><svg class="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span>${sanitizeHTML(f)}</span></li>`).join('')}
                     </ul>
                 </div>
             `;
@@ -467,21 +526,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let html = `
             <div class="space-y-6">
-                <div class="text-center">
-                    <p class="text-lg text-blue-200/80">AI Estimated Value</p>
-                    <p class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-teal-200 py-2">${formattedValue}</p>
+                <div class="text-center p-6 bg-white/10 rounded-lg">
+                    <p class="text-sm font-semibold text-blue-200/80 uppercase tracking-wider">Estimated Value</p>
+                    <h2 class="text-5xl font-extrabold my-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-teal-200">${formattedValue}</h2>
+                    <div class="inline-flex flex-wrap justify-center items-center gap-4">
+                        <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full ${confidenceClass}">${sanitizeHTML(data.valuationConfidence)} Confidence</span>
+                         <div class="bg-blue-500/20 text-blue-300 px-3 py-1 text-sm font-semibold rounded-full">
+                            <strong>Action:</strong> ${sanitizeHTML(data.recommendedAction)}
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-white/10 p-4 rounded-lg">
+
+                <div>
                     <h3 class="text-xl font-bold text-blue-200 mb-2">Valuation Summary</h3>
-                    <p class="text-blue-100/90">${sanitizeHTML(data.summary)}</p>
+                    <p class="text-blue-200/90 bg-white/5 p-4 rounded-md">${sanitizeHTML(data.summary)}</p>
                 </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    ${factorList('Positive Factors', data.positiveFactors, 'text-green-400')}
-                    ${factorList('Negative Factors', data.negativeFactors, 'text-red-400')}
+                    ${factorList('Positive Factors', data.positiveFactors, '👍')}
+                    ${factorList('Negative Factors', data.negativeFactors, '👎')}
                 </div>
-                <p class="text-xs text-center text-blue-200/60 mt-4">Disclaimer: This is an AI-generated estimate and not a formal appraisal. Actual market value may vary.</p>
+                
+                 <div>
+                    <h3 class="text-xl font-bold text-blue-200 mb-2">Monetization Strategies</h3>
+                     <div class="flex flex-wrap gap-2">
+                         ${data.monetizationStrategies && data.monetizationStrategies.map(s => `
+                            <span class="bg-teal-500/20 text-teal-300 px-3 py-1 text-sm font-semibold rounded-full">${sanitizeHTML(s)}</span>
+                        `).join('')}
+                    </div>
+                </div>
+
             </div>
         `;
+
         container.innerHTML = html;
     };
 });
