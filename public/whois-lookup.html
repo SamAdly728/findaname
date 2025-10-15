@@ -82,6 +82,7 @@
                 placeholder="Enter a domain name (e.g., google.com)"
                 class="w-full pl-5 pr-32 py-4 text-lg bg-white/10 border border-white/20 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none backdrop-blur-sm transition-all duration-300"
                 required
+                aria-label="Domain name for WHOIS lookup"
                 />
                 <button
                 type="submit"
@@ -109,6 +110,12 @@
                     (adsbygoogle = window.adsbygoogle || []).push({});
                 </script>
             </div>
+        </div>
+
+        <div class="mt-12 text-left space-y-4">
+            <h2 class="text-2xl font-bold text-blue-200">What is WHOIS Data?</h2>
+            <p>WHOIS is a public record of who owns a domain name and how to get in contact with them. When someone registers a domain, ICANN (the organization that manages domain names) requires them to provide contact information. This information is then stored in the public WHOIS database.</p>
+            <p>Our tool queries this database to retrieve key details like the domain registrar, creation and expiration dates, the domain's current status, and the nameservers it points to. It's an essential tool for researching domain ownership, checking a domain's age, or finding contact information for a website owner.</p>
         </div>
 
         <div class="mt-12 text-center">

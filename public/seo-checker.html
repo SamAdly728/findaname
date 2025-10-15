@@ -83,6 +83,7 @@
                     placeholder="Enter a full website URL (e.g., https://google.com)"
                     class="w-full pl-5 pr-32 py-4 text-lg bg-white/10 border border-white/20 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none backdrop-blur-sm transition-all duration-300"
                     required
+                    aria-label="Website URL for SEO analysis"
                 />
                 <button
                     type="submit"
@@ -110,6 +111,17 @@
                     (adsbygoogle = window.adsbygoogle || []).push({});
                 </script>
             </div>
+        </div>
+
+        <div class="mt-12 text-left space-y-4">
+            <h2 class="text-2xl font-bold text-blue-200">Understanding Your SEO Score</h2>
+            <p>Our SEO Checker, powered by Google's Lighthouse technology, provides a comprehensive audit of your website's technical health and user experience. A high score in these areas is crucial for ranking well in search results.</p>
+            <ul class="list-disc list-inside ml-4 space-y-2 mt-2">
+                <li><strong>Performance:</strong> Measures how fast your page loads and becomes interactive. Core Web Vitals like LCP, CLS, and TBT are key factors here.</li>
+                <li><strong>Accessibility:</strong> Checks if your website is usable by people with disabilities. This includes proper alt text for images, sufficient color contrast, and correct ARIA attributes.</li>
+                <li><strong>Best Practices:</strong> Looks for modern web development standards that lead to a healthier and more secure site.</li>
+                <li><strong>SEO:</strong> Audits for fundamental on-page SEO factors, such as having a `&lt;title&gt;` tag and a meta description, to ensure your site is understandable to search engine crawlers.</li>
+            </ul>
         </div>
 
         <div class="mt-12 text-center">

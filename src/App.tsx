@@ -172,6 +172,7 @@ const App: React.FC = () => {
               placeholder="e.g., 'quantum ai' or 'sustainable travel'"
               className="w-full pl-12 pr-36 py-4 text-lg bg-white/10 border border-white/20 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none backdrop-blur-sm transition-all duration-300"
               disabled={isLoading}
+              aria-label="Enter a keyword to generate domain names"
             />
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <SearchIcon className="h-6 w-6 text-blue-200/50" />
