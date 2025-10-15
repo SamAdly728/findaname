@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // --- HOSTING LOOKUP (REWORKED) ---
+    // --- HOSTING LOOKUP (REWORKED & FIXED) ---
     if (hostingForm) {
         hostingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -141,7 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ipAddress = aRecord.data;
 
                 // Step 2: Use the IP address to find hosting details from a free IP info API.
-                const ipApiResponse = await fetch(`http://ip-api.com/json/${ipAddress}?fields=status,message,country,regionName,city,timezone,isp,org,as,query`);
+                // FIXED: Changed from http to https to prevent mixed-content errors.
+                const ipApiResponse = await fetch(`https://ip-api.com/json/${ipAddress}?fields=status,message,country,regionName,city,timezone,isp,org,as,query`);
                 if (!ipApiResponse.ok) throw new Error('Failed to query IP information service.');
 
                 const ipApiData = await ipApiResponse.json();
@@ -182,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- WEBSITE DOWN CHECKER (No API Key needed) ---
+    // --- WEBSITE DOWN CHECKER (FIXED with reliable API) ---
     if (downForm) {
         downForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -190,18 +191,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
             showLoading(resultsContainer);
-
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out after 8 seconds.')), 8000));
             
             try {
-                // 'no-cors' allows checking reachability without violating security policies.
-                await Promise.race([
-                    fetch(`https://${domain}`, { mode: 'no-cors' }),
-                    timeoutPromise
-                ]);
-                renderWebsiteDownResults(resultsContainer, { isUp: true, domain });
+                // Using a reliable, free, CORS-enabled API for checking site status.
+                const response = await fetch(`https://isitup.org/${domain}.json`);
+                if (!response.ok) {
+                    throw new Error('Status check service is currently unavailable.');
+                }
+                const data = await response.json();
+                renderWebsiteDownResults(resultsContainer, data);
             } catch (error) {
-                renderWebsiteDownResults(resultsContainer, { isUp: false, domain, error: error.message });
+                const message = error instanceof Error ? error.message : 'An unknown network error occurred.';
+                renderError(resultsContainer, `Could not check status: ${message}`);
             }
         });
     }
@@ -298,16 +299,27 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     };
     
-    const renderWebsiteDownResults = (container, { isUp, domain, error }) => {
+    const renderWebsiteDownResults = (container, data) => {
+        // status_code 1 = up, 2 = down, 3 = invalid
+        const isUp = data.status_code === 1;
+        const isInvalid = data.status_code === 3;
+
+        if (isInvalid) {
+            return renderError(container, `"${sanitizeHTML(data.domain)}" does not appear to be a valid domain.`);
+        }
+
         const statusClass = isUp ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300';
         const statusText = isUp ? 'UP and running' : 'DOWN';
+        const description = isUp 
+            ? `The website is online and responded with code ${data.response_code} in ${data.response_time} seconds.`
+            : 'The website seems to be offline from our check. It might be down for everyone.';
+            
         container.innerHTML = `
             <div class="${statusClass} p-6 rounded-lg text-center">
                 <h3 class="text-3xl font-bold">
-                    ${sanitizeHTML(domain)} is <span class="uppercase">${statusText}</span>
+                    ${sanitizeHTML(data.domain)} is <span class="uppercase">${statusText}</span>
                 </h3>
-                ${isUp ? `<p class="mt-2">The website appears to be online and reachable from our check.</p>` 
-                       : `<p class="mt-2">We were unable to connect to the website. It might be down for everyone. (Reason: ${sanitizeHTML(error)})</p>`}
+                <p class="mt-2">${description}</p>
             </div>
         `;
     };
