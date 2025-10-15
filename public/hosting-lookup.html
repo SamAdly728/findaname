@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="https://webexpert.world.masonryresto.com/wp-content/uploads/2025/10/Find-A-Name-Logo-1.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contact Us - FindAName.live</title>
+    <title>Hosting Provider Lookup - FindAName.live</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8050638035807727"
@@ -31,35 +31,37 @@
 
     <main class="container mx-auto px-4 py-8 md:py-12 text-blue-100/80">
       <div class="max-w-3xl mx-auto text-center bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg p-8">
-        <h1 class="text-4xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-300">Get in Touch</h1>
-        <p class="text-lg md:text-xl text-blue-100/80 mb-8">We'd love to hear from you. Here's how you can reach us.</p>
-        
-        <div class="space-y-6">
-            <div class="bg-white/10 p-6 rounded-lg">
-                <h2 class="text-2xl font-bold text-blue-200 mb-2">Email</h2>
-                <p class="text-lg mb-3">For general inquiries, support, or feedback.</p>
-                <a href="mailto:info@findaname.live" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors">
-                    info@findaname.live
-                </a>
+        <h1 class="text-4xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-300">Who is Hosting This?</h1>
+        <p class="text-lg md:text-xl text-blue-100/80 mb-8">Discover the hosting provider for any website.</p>
+
+        <form id="hosting-lookup-form" class="max-w-xl mx-auto mb-8">
+            <div class="relative">
+                <input
+                type="text"
+                placeholder="Enter a domain name (e.g., google.com)"
+                class="w-full pl-5 pr-32 py-4 text-lg bg-white/10 border border-white/20 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none backdrop-blur-sm transition-all duration-300"
+                required
+                />
+                <button
+                type="submit"
+                class="absolute inset-y-0 right-0 m-1.5 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 rounded-full font-semibold flex items-center justify-center transition-all duration-300"
+                >
+                Lookup
+                </button>
             </div>
-            
-            <div class="bg-white/10 p-6 rounded-lg">
-                <h2 class="text-2xl font-bold text-blue-200 mb-2">WhatsApp</h2>
-                <p class="text-lg mb-3">For quick questions and direct contact.</p>
-                <a href="https://wa.me/639495868221" target="_blank" rel="noopener noreferrer" class="inline-block px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg font-semibold transition-colors">
-                    Chat on WhatsApp
-                </a>
-            </div>
+        </form>
+
+        <div id="results-container" class="text-left bg-white/5 p-6 rounded-lg min-h-[150px]">
+            <p class="text-blue-200/60">Results will be displayed here...</p>
         </div>
         
-        <!-- AdSense Block -->
         <div class="my-8">
             <div class="adsense-container text-center my-4 min-h-[50px] flex items-center justify-center bg-white/5 rounded-lg w-full">
                 <ins
                     class="adsbygoogle"
                     style="display:block"
                     data-ad-client="ca-pub-8050638035807727"
-                    data-ad-slot="5928091834"
+                    data-ad-slot="5928091834" 
                     data-ad-format="auto"
                     data-full-width-responsive="true"></ins>
                 <script>
@@ -69,27 +71,28 @@
         </div>
 
         <div class="mt-12 text-center">
-            <a href="/" class="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors">
-                &larr; Back to Home
+            <a href="/" class="inline-block px-8 py-3 bg-blue-600/50 hover:bg-blue-600/80 rounded-lg font-semibold transition-colors">
+                &larr; Back to Domain Generator
             </a>
         </div>
       </div>
     </main>
 
     <footer class="py-6 px-4 mt-12 border-t border-white/10">
-        <div class="container mx-auto text-center text-blue-200/60">
-            <p>&copy; 2023 FindAName.live. All rights reserved.</p>
-            <div class="mt-2 space-x-4">
-                <a href="/privacy.html" class="hover:text-blue-300 transition-colors">Privacy Policy</a>
-                <span>|</span>
-                <a href="/terms.html" class="hover:text-blue-300 transition-colors">Terms of Service</a>
-                <span>|</span>
-                <a href="/contact.html" class="hover:text-blue-300 transition-colors">Contact</a>
-            </div>
+      <div class="container mx-auto text-center text-blue-200/60">
+        <p>&copy; 2023 FindAName.live. All rights reserved.</p>
+        <div class="mt-2 space-x-4">
+          <a href="/privacy.html" class="hover:text-blue-300 transition-colors">Privacy Policy</a>
+          <span>|</span>
+          <a href="/terms.html" class="hover:text-blue-300 transition-colors">Terms of Service</a>
+          <span>|</span>
+          <a href="/contact.html" class="hover:text-blue-300 transition-colors">Contact</a>
         </div>
+      </div>
     </footer>
     <script>
         document.querySelector('footer p').innerHTML = `&copy; ${new Date().getFullYear()} FindAName.live. All rights reserved.`;
     </script>
+    <script src="/tools.js" defer></script>
   </body>
 </html>
