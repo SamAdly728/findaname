@@ -23,8 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const sanitize = (str) => {
+        if (str === null || str === undefined) return '';
         const temp = document.createElement('div');
-        temp.textContent = str;
+        temp.textContent = str.toString();
         return temp.innerHTML;
     }
 
@@ -50,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const domain = dnsForm.querySelector('input').value.trim();
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            const url = `https://www.whoisxmlapi.com/whoisserver/DNSService?apiKey=${apiKey}&domainName=${domain}&type=_all&outputFormat=JSON`;
+            const url = `https://dns.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}&type=_all`;
             const data = await fetchData(url, resultsContainer);
             if (data) renderDnsResults(resultsContainer, data);
         });
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const domain = whoisForm.querySelector('input').value.trim();
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
+            const url = `https://www.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}`;
             const data = await fetchData(url, resultsContainer);
             if (data) renderWhoisResults(resultsContainer, data);
         });
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const domain = nsForm.querySelector('input').value.trim();
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
+            const url = `https://www.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}`;
             const data = await fetchData(url, resultsContainer);
             if (data) renderNameserverResults(resultsContainer, data);
         });
@@ -88,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const resultsContainer = document.getElementById('results-container');
             
             // Step 1: Get IP address from DNS A record
-            const dnsUrl = `https://www.whoisxmlapi.com/whoisserver/DNSService?apiKey=${apiKey}&domainName=${domain}&type=A&outputFormat=JSON`;
+            const dnsUrl = `https://dns.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}&type=A`;
             const dnsData = await fetchData(dnsUrl, resultsContainer);
 
             if (dnsData?.DNSData?.dnsRecords?.[0]?.address) {
@@ -98,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const geoData = await fetchData(geoUrl, resultsContainer);
                 if (geoData) renderHostingResults(resultsContainer, geoData, domain, ipAddress);
             } else {
-                 renderError(resultsContainer, `Could not resolve an IP address for ${domain}.`);
+                 renderError(resultsContainer, `Could not resolve an IP address for ${sanitize(domain)}.`);
             }
         });
     }
@@ -121,10 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         let html = '<div class="space-y-4">';
         data.DNSData.dnsRecords.forEach(rec => {
+            const value = rec.address || rec.target || rec.value || rec.name || JSON.stringify(rec);
             html += `
                 <div class="p-3 bg-white/10 rounded-lg">
                     <strong class="text-blue-300 font-semibold">${sanitize(rec.type)}</strong>
-                    <div class="pl-4 text-blue-100/90 break-words">${sanitize(rec.address || rec.target || rec.value || rec.name || JSON.stringify(rec))}</div>
+                    <div class="pl-4 text-blue-100/90 break-words">${sanitize(value)}</div>
                 </div>
             `;
         });
@@ -143,13 +145,13 @@ document.addEventListener('DOMContentLoaded', () => {
             "Creation Date": record.createdDate ? new Date(record.createdDate).toDateString() : 'N/A',
             "Expiration Date": record.expiresDate ? new Date(record.expiresDate).toDateString() : 'N/A',
             "Updated Date": record.updatedDate ? new Date(record.updatedDate).toDateString() : 'N/A',
-            "Status": record.status,
+            "Status": Array.isArray(record.status) ? record.status.join(', ') : record.status,
             "Name Servers": record.nameServers?.hostNames?.join('<br>'),
-            "Registrant Contact": `${record.registrant?.name || ''} <br> ${record.registrant?.organization || ''} <br> ${record.registrant?.email || ''}`.replace(/<br>\s*<br>/g, '<br>'),
+            "Registrant Contact": `${record.registrant?.name || ''} <br> ${record.registrant?.organization || ''} <br> ${record.registrant?.email || ''}`.replace(/<br>\s*<br>/g, '<br>').trim(),
         };
         let html = '<div class="space-y-2">';
         for (const [key, value] of Object.entries(displayData)) {
-            if (value) {
+            if (value && value.replace(/<br>/g, '').trim()) {
                 html += `
                     <div class="flex flex-col sm:flex-row border-b border-white/10 pb-2">
                         <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitize(key)}:</dt>
@@ -180,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderHostingResults = (container, data, domain, ip) => {
         if (!data?.isp) {
-             return renderError(container, `Could not determine hosting provider for ${domain}.`);
+             return renderError(container, `Could not determine hosting provider for ${sanitize(domain)}.`);
         }
         const displayData = {
             "Domain": domain,
