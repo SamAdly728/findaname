@@ -136,9 +136,10 @@ const App: React.FC = () => {
     // The user has requested to use 'a5fe41269e066dfef064e' for NameSilo affiliate links.
     // This value will be used as the affiliate ID ('rid').
     const nameSiloAffiliateCode = 'a5fe41269e066dfef064e';
+    const encodedDomain = encodeURIComponent(domainName);
     
-    // This link directs the user to the registration page with the domain pre-filled.
-    const searchLink = `https://www.namesilo.com/register.php?domain=${domainName}`;
+    // This link directs the user to the search result page with the domain pre-filled.
+    const searchLink = `https://www.namesilo.com/domain/search?query=${encodedDomain}`;
     
     if (nameSiloAffiliateCode) {
         return `${searchLink}&rid=${nameSiloAffiliateCode}`;
