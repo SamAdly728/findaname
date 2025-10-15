@@ -12,8 +12,6 @@ export const Header: React.FC = () => {
         <nav className="hidden md:flex flex-grow justify-center items-center gap-x-6 lg:gap-x-8">
             <a href="/dns-lookup.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">DNS Lookup</a>
             <a href="/whois-lookup.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
-            <a href="/nameserver-lookup.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">Nameserver Lookup</a>
-            <a href="/hosting-lookup.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">Hosting Lookup</a>
             <a href="/website-down-checker.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">Is It Down?</a>
         </nav>
         {/* This empty div helps to perfectly center the nav items in the space between the logo and the edge */}

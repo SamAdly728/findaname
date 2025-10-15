@@ -5,8 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get form elements
     const dnsForm = document.getElementById('dns-lookup-form');
     const whoisForm = document.getElementById('whois-lookup-form');
-    const nsForm = document.getElementById('nameserver-lookup-form');
-    const hostingForm = document.getElementById('hosting-lookup-form');
     const downForm = document.getElementById('website-down-form');
 
     /**
@@ -47,40 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return temp.innerHTML;
     };
 
-    const fetchDataWithApiKey = async (url, container) => {
-        showLoading(container);
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.ErrorMessage) {
-                throw new Error(data.ErrorMessage.msg || 'The API returned an error.');
-            }
-             if (data.messages) {
-                throw new Error(data.messages);
-            }
-
-            if (!response.ok) {
-                 throw new Error(`Network response was not ok: ${response.statusText} (Status: ${response.status})`);
-            }
-            
-            return data;
-        } catch (err) {
-            const message = err instanceof Error ? err.message : 'An unknown network error occurred.';
-            renderError(container, message);
-            console.error("API Fetch Error:", err);
-            return null;
-        }
-    };
-
-    // --- DNS LOOKUP (ENHANCED to fetch multiple record types) ---
+    // --- DNS LOOKUP ---
     if (dnsForm) {
         dnsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const domain = sanitizeDomain(dnsForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            // By requesting type=ANY, we get all available common record types.
             const url = `https://dns.google/resolve?name=${domain}&type=ANY`;
             showLoading(resultsContainer);
             try {
@@ -93,82 +64,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- WHOIS LOOKUP ---
+    // --- WHOIS LOOKUP (ENHANCED with Hosting Info) ---
     if (whoisForm) {
         whoisForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const domain = sanitizeDomain(whoisForm.querySelector('input').value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
-            const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
-            const data = await fetchDataWithApiKey(url, resultsContainer);
-            if (data) renderWhoisResults(resultsContainer, data);
-        });
-    }
-
-    // --- NAMESERVER LOOKUP ---
-    if (nsForm) {
-        nsForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const domain = sanitizeDomain(nsForm.querySelector('input').value);
-            if (!domain) return;
-            const resultsContainer = document.getElementById('results-container');
-            const url = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
-            const data = await fetchDataWithApiKey(url, resultsContainer);
-            if (data) renderNameserverResults(resultsContainer, data);
-        });
-    }
-    
-    // --- HOSTING LOOKUP (FIXED with ipinfo.io) ---
-    if (hostingForm) {
-        hostingForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const domain = sanitizeDomain(hostingForm.querySelector('input').value);
-            if (!domain) return;
-            const resultsContainer = document.getElementById('results-container');
             showLoading(resultsContainer);
 
-            try {
-                const ipInfoResponse = await fetch(`https://ipinfo.io/${domain}/json`);
-                if (!ipInfoResponse.ok) throw new Error('Failed to query the hosting information service.');
+            const whoisUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
+            const hostingUrl = `https://ipinfo.io/${domain}/json`;
 
-                const ipInfoData = await ipInfoResponse.json();
-                if (ipInfoData.error) {
-                    throw new Error(ipInfoData.error.message || `Could not get hosting details for "${domain}".`);
-                }
-                
-                const displayData = {
-                    "Domain": domain,
-                    "IP Address": ipInfoData.ip,
-                    "Hosting Provider (ISP)": ipInfoData.org,
-                    "Hostname": ipInfoData.hostname,
-                    "Location": [ipInfoData.city, ipInfoData.region, ipInfoData.country].filter(Boolean).join(', '),
-                    "Timezone": ipInfoData.timezone,
-                };
+            const [whoisResponse, hostingResponse] = await Promise.allSettled([
+                fetch(whoisUrl),
+                fetch(hostingUrl)
+            ]);
 
-                let html = '<div class="space-y-2">';
-                for (const [key, value] of Object.entries(displayData)) {
-                    if (value) {
-                         html += `
-                            <div class="flex flex-col sm:flex-row border-b border-white/10 pb-2">
-                                <dt class="w-full sm:w-1/3 font-semibold text-blue-200/70">${sanitizeHTML(key)}:</dt>
-                                <dd class="w-full sm:w-2/3 text-blue-100 break-words">${sanitizeHTML(value)}</dd>
-                            </div>
-                        `;
-                    }
-                }
-                html += '</div>';
-                resultsContainer.innerHTML = html;
+            let whoisData = null;
+            let hostingData = null;
+            let whoisError = null;
 
-            } catch (err) {
-                const message = err instanceof Error ? err.message : 'An unknown error occurred.';
-                renderError(resultsContainer, message);
-                console.error("Hosting Lookup Error:", err);
+            if (whoisResponse.status === 'fulfilled' && whoisResponse.value.ok) {
+                whoisData = await whoisResponse.value.json();
+            } else {
+                whoisError = 'Failed to fetch WHOIS data.';
             }
+
+            if (hostingResponse.status === 'fulfilled' && hostingResponse.value.ok) {
+                hostingData = await hostingResponse.value.json();
+            }
+            
+            if (!whoisData && !hostingData) {
+                return renderError(resultsContainer, whoisError || 'Could not fetch any data for this domain.');
+            }
+
+            renderWhoisAndHostingResults(resultsContainer, whoisData, hostingData);
         });
     }
 
-    // --- WEBSITE DOWN CHECKER (FIXED with isitup.org API) ---
+    // --- WEBSITE DOWN CHECKER (FIXED with api.downfor.cloud) ---
     if (downForm) {
         downForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -178,13 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoading(resultsContainer);
             
             try {
-                // Using the reliable isitup.org API.
-                const response = await fetch(`https://isitup.org/${domain}.json`);
+                const response = await fetch(`https://api.downfor.cloud/httpcheck/${domain}`);
                 if (!response.ok) {
-                    throw new Error('Status check service is currently unavailable.');
+                    throw new Error('Status check service returned an error.');
                 }
                 const data = await response.json();
-                renderIsItUpResults(resultsContainer, data);
+                renderIsItDownResults(resultsContainer, data, domain);
             } catch (error) {
                 const message = error instanceof Error ? error.message : 'An unknown network error occurred.';
                 renderError(resultsContainer, `Could not check status: ${message}`);
@@ -193,13 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     const renderGoogleDnsResults = (container, data) => {
-        // More extensive list of common DNS record types.
         const recordTypes = { 1: 'A', 2: 'NS', 5: 'CNAME', 6: 'SOA', 15: 'MX', 16: 'TXT', 28: 'AAAA', 33: 'SRV', 43: 'DS', 257: 'CAA' };
         if (!data || !data.Answer || data.Answer.length === 0) {
             return renderError(container, 'No DNS records found for this domain.');
         }
         let html = '<div class="space-y-4">';
-        // Group records by type for better readability
         const recordsByType = data.Answer.reduce((acc, rec) => {
             const typeName = recordTypes[rec.type] || `Type ${rec.type}`;
             if (!acc[typeName]) {
@@ -254,65 +186,56 @@ document.addEventListener('DOMContentLoaded', () => {
         return html;
     };
 
-    const renderWhoisResults = (container, data) => {
-        const record = data?.WhoisRecord;
-        if (!record || !record.createdDate) {
-            return renderError(container, 'No WHOIS record found. The domain might be available.');
-        }
-        
+    const renderWhoisAndHostingResults = (container, whoisData, hostingData) => {
+        const record = whoisData?.WhoisRecord;
         let html = '<div class="space-y-0">';
 
-        html += '<h3 class="text-xl font-bold text-blue-200 mb-2">Domain Information</h3>';
-        html += renderDataItem('Domain', record.domainName);
-        html += renderDataItem('Registered On', record.createdDate ? new Date(record.createdDate).toUTCString() : 'N/A');
-        html += renderDataItem('Expires On', record.expiresDate ? new Date(record.expiresDate).toUTCString() : 'N/A');
-        html += renderDataItem('Updated On', record.updatedDate ? new Date(record.updatedDate).toUTCString() : 'N/A');
-        html += renderDataItem('Status', record.status);
-        html += renderDataItem('Name Servers', record.nameServers?.hostNames);
-        
-        html += '<h3 class="text-xl font-bold text-blue-200 mt-6 mb-2">Registrar Information</h3>';
-        html += renderDataItem('Registrar', record.registrarName);
-        html += renderDataItem('IANA ID', record.registrarIANAID);
-        html += renderDataItem('Abuse Email', record.contactEmail); // often the registrar's abuse contact
-        
-        html += renderContactBlock('Registrant Contact', record.registrant);
-        html += renderContactBlock('Administrative Contact', record.administrativeContact);
-        html += renderContactBlock('Technical Contact', record.technicalContact);
+        if (record && record.createdDate) {
+            html += '<h3 class="text-xl font-bold text-blue-200 mb-2">WHOIS Information</h3>';
+            html += renderDataItem('Domain', record.domainName);
+            html += renderDataItem('Registered On', record.createdDate ? new Date(record.createdDate).toUTCString() : 'N/A');
+            html += renderDataItem('Expires On', record.expiresDate ? new Date(record.expiresDate).toUTCString() : 'N/A');
+            html += renderDataItem('Updated On', record.updatedDate ? new Date(record.updatedDate).toUTCString() : 'N/A');
+            html += renderDataItem('Status', record.status);
+            html += renderDataItem('Name Servers', record.nameServers?.hostNames);
+            
+            html += '<h3 class="text-xl font-bold text-blue-200 mt-6 mb-2">Registrar Information</h3>';
+            html += renderDataItem('Registrar', record.registrarName);
+            html += renderDataItem('IANA ID', record.registrarIANAID);
+            html += renderDataItem('Abuse Email', record.contactEmail);
+            
+            html += renderContactBlock('Registrant Contact', record.registrant);
+            html += renderContactBlock('Administrative Contact', record.administrativeContact);
+            html += renderContactBlock('Technical Contact', record.technicalContact);
+        } else {
+             html += '<h3 class="text-xl font-bold text-blue-200 mb-2">WHOIS Information</h3>';
+             html += '<p class="text-blue-200/60">No WHOIS record found. The domain might be available.</p>';
+        }
+
+        if (hostingData && !hostingData.error) {
+            html += '<h3 class="text-xl font-bold text-blue-200 mt-6 mb-2">Hosting Information</h3>';
+            html += renderDataItem('IP Address', hostingData.ip);
+            html += renderDataItem('Hosting Provider (ISP)', hostingData.org);
+            html += renderDataItem('Hostname', hostingData.hostname);
+            html += renderDataItem('Location', [hostingData.city, hostingData.region, hostingData.country].filter(Boolean).join(', '));
+            html += renderDataItem('Timezone', hostingData.timezone);
+        }
 
         html += '</div>';
         container.innerHTML = html;
     };
-
-    const renderNameserverResults = (container, data) => {
-        const nameservers = data?.WhoisRecord?.nameServers?.hostNames;
-        if (!nameservers || nameservers.length === 0) {
-            return renderError(container, 'No nameservers found for this domain.');
-        }
-        let html = `
-            <h3 class="text-xl font-bold text-blue-200 mb-4">Nameservers for ${sanitizeHTML(data.WhoisRecord.domainName)}:</h3>
-            <ul class="list-disc list-inside space-y-2">
-        `;
-        nameservers.forEach(ns => {
-            html += `<li class="p-2 bg-white/10 rounded">${sanitizeHTML(ns)}</li>`;
-        });
-        html += '</ul>';
-        container.innerHTML = html;
-    };
     
-    const renderIsItUpResults = (container, data) => {
-        const { domain, status_code, response_time } = data;
+    const renderIsItDownResults = (container, data, domain) => {
         let statusClass, statusText, description;
 
-        if (status_code === 1) { // Site is up
+        if (data.success && data.result.is_online) {
             statusClass = 'bg-green-500/20 text-green-300';
             statusText = 'UP and running';
-            description = `The website appears to be online and accessible from our servers. Response time: ${response_time}s.`;
-        } else if (status_code === 2) { // Site is down
+            description = `The website appears to be online and accessible. Response time: ${data.result.response.response_time}ms.`;
+        } else {
             statusClass = 'bg-red-500/20 text-red-300';
             statusText = 'DOWN';
-            description = 'The website seems to be offline from our check. It might be down for everyone.';
-        } else { // Invalid domain
-            return renderError(container, `Could not check "${domain}". It does not appear to be a valid domain.`);
+            description = data.error?.message || 'The website seems to be offline or is not responding.';
         }
             
         container.innerHTML = `
