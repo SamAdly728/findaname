@@ -14,6 +14,7 @@ export const Header: React.FC = () => {
             <a href="/whois-lookup.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
             <a href="/seo-checker.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">SEO Checker</a>
             <a href="/domain-value-calculator.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">Domain Value</a>
+            <a href="/blog/" className="text-blue-200/80 hover:text-white transition-colors font-medium">Blog</a>
         </nav>
         {/* This empty div helps to perfectly center the nav items in the space between the logo and the edge */}
         <div className="w-24 hidden md:block"></div>

@@ -72,6 +72,7 @@
             <a href="/whois-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
             <a href="/seo-checker.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">SEO Checker</a>
             <a href="/domain-value-calculator.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">Domain Value</a>
+            <a href="/blog/" class="text-blue-200/80 hover:text-white transition-colors font-medium">Blog</a>
         </nav>
         <div class="w-24 hidden md:block"></div>
       </div>
@@ -114,7 +115,13 @@
                     data-ad-format="auto"
                     data-full-width-responsive="true"></ins>
                 <script>
-                    (adsbygoogle = window.adsbygoogle || []).push({});
+                    setTimeout(function() {
+                        try {
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                        } catch(e) {
+                            console.error('AdSense error:', e);
+                        }
+                    }, 150);
                 </script>
             </div>
         </div>
@@ -142,6 +149,8 @@
           <a href="/terms.html" class="hover:text-blue-300 transition-colors">Terms of Service</a>
           <span>|</span>
           <a href="/contact.html" class="hover:text-blue-300 transition-colors">Contact</a>
+           <span>|</span>
+          <a href="/automation-guide.html" class="hover:text-blue-300 transition-colors">Automation Guide</a>
         </div>
       </div>
     </footer>

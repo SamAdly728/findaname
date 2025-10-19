@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="https://webexpert.world.masonryresto.com/wp-content/uploads/2025/10/Find-A-Name-Logo-1.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO Meta Tags -->
+    <title>Automate Blog Posts with Make.com | FindAName.live</title>
+    <meta name="description" content="Learn how to automate content creation for your static website using Make.com and AI. This guide provides a template and workflow for generating and publishing new blog posts." />
+    <meta name="keywords" content="make.com automation, static site blog, content automation, ai blog writer, webhook" />
+    <link rel="canonical" href="https://findaname.live/automation-guide.html" />
+    <meta name="robots" content="noindex, follow" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" />
+     <style>
+        .prose h2 {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+            font-weight: 700;
+            color: #dbeafe; /* blue-200 */
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 0.5rem;
+        }
+        .prose h3 {
+            font-size: 1.5rem;
+            line-height: 2rem;
+            font-weight: 600;
+            color: #bfdbfe; /* blue-300 */
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        .prose p, .prose li {
+            margin-bottom: 1.5rem;
+            line-height: 1.75;
+        }
+        .prose ul {
+            list-style-type: disc;
+            padding-left: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .prose strong {
+            color: #f0f9ff;
+        }
+        .prose code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 6px;
+        }
+        .prose pre {
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-[#0a1024] to-[#0d183a] text-white font-sans">
+    <header class="py-6 px-4">
+      <div class="container mx-auto flex justify-between items-center">
+        <a href="/" class="flex items-center gap-2 flex-shrink-0">
+          <div class="bg-white p-2 rounded-xl shadow-lg">
+            <img src="https://webexpert.world.masonryresto.com/wp-content/uploads/2025/10/Find-A-Name-Logo-1.png" alt="FindAName.live Logo" class="h-12 w-auto" />
+          </div>
+        </a>
+        <nav class="hidden md:flex flex-grow justify-center items-center gap-x-6 lg:gap-x-8">
+            <a href="/dns-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">DNS Lookup</a>
+            <a href="/whois-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
+            <a href="/seo-checker.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">SEO Checker</a>
+            <a href="/domain-value-calculator.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">Domain Value</a>
+            <a href="/blog/" class="text-blue-200/80 hover:text-white transition-colors font-medium">Blog</a>
+        </nav>
+        <div class="w-24 hidden md:block"></div>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12 text-blue-100/80">
+      <div class="max-w-3xl mx-auto prose">
+        <a href="/blog/" class="text-blue-400 hover:text-teal-300 font-semibold mb-6 inline-block no-underline">&larr; Back to Blog</a>
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-300">Automating Blog Posts with Make.com</h1>
+        <p class="text-lg text-blue-200/70">A guide to generating and publishing content for your static site using AI and automation.</p>
+
+        <p>One of the best things about a static website is its speed and security. However, this can make content updates, like adding a new blog post, feel like a manual process. But what if you could automate most of it? This guide will show you how to build a powerful content creation workflow using Make.com (formerly Integromat) and AI, allowing you to generate and format a complete blog post that you can then easily add to your site.</p>
+
+        <h2>The Concept: A "Pseudo-Automation" Workflow</h2>
+        <p>Since this is a static site without a database or CMS, we can't have Make.com *directly* publish a new post. Instead, we'll create a scenario that does 95% of the work: it will take a title, use AI to write a full article, and then format it into a complete HTML file. The final step is for you to simply copy this HTML, create a new file in your project (e.g., `post-4-new-article.html`), and deploy the site.</p>
+        
+        <p>This workflow saves you hours of writing, formatting, and coding for each new article.</p>
+
+        <h2>The Make.com Scenario</h2>
+        <p>Here’s a breakdown of the modules you would use in your Make.com scenario:</p>
+        
+        <h3>1. The Trigger: How to Start the Process</h3>
+        <p>You need a way to tell Make.com to create a new post. Here are a few great options:</p>
+        <ul>
+            <li><strong>Webhook:</strong> The most flexible option. You can create a simple form or even just trigger it manually to start the scenario.</li>
+            <li><strong>Airtable:</strong> Create a simple base with a "Title" field and a "Status" field. The scenario can trigger whenever a new record is added or when the status is changed to "Ready to Write".</li>
+            <li><strong>Google Sheets:</strong> Similar to Airtable, a new row in a specific spreadsheet can act as the trigger, with a column for your blog post title.</li>
+        </ul>
+
+        <h3>2. The AI Writer: Generating the Content</h3>
+        <p>This is where the magic happens. Use the <strong>OpenAI (ChatGPT)</strong> or <strong>Google Gemini</strong> module in Make.com.</p>
+        <ul>
+            <li>Connect your AI service account.</li>
+            <li>Choose the "Create a Completion" or similar action.</li>
+            <li>In the "Prompt" field, you will give the AI its instructions. This is the most important part! Use a detailed prompt that tells the AI exactly what you want. You can pass the title from your trigger step.</li>
+        </ul>
+        <p><strong>Example Prompt for the AI Module:</strong></p>
+        <pre><code class="language-text">Act as an expert blog writer for FindAName.live. Your tone should be informative, engaging, and professional.
+
+Write a comprehensive blog post of at least 600 words based on the following title: "{{1.title}}"
+
+The blog post should be well-structured with an introduction, several sections with clear H2 headings, and a concluding paragraph. Ensure the content is relevant to domain names, branding, AI, or SEO.
+
+Do not include a main title (H1) in your response, as that will be added in the HTML template. Your response should start directly with the first paragraph of the article. Format the headings as "<h2>Heading Text</h2>".</code></pre>
+        <p>This prompt instructs the AI on its persona, article length, structure, and topic, and even tells it how to format headings for easy HTML integration.</p>
+
+        <h3>3. The HTML Formatter: Creating the Final File</h3>
+        <p>The final step is to assemble the complete HTML file. The easiest way to do this is with the <strong>"Text Aggregator"</strong> module, or even just a simple <strong>"Set Variable"</strong> module.</p>
+        <p>You will create a complete HTML template and insert the content generated by the AI module in the middle. Below is a ready-to-use template for your blog. You can copy and paste this directly into your Make.com module.</p>
+        <p><strong>Note:</strong> In the template below, you'll need to replace `{{2.choices[].text}}` with the variable from your AI module that contains the generated article content. You'll also replace `{{1.title}}` with the variable from your trigger module.</p>
+        
+        <h3>4. The Output: Getting Your HTML File</h3>
+        <p>Once the HTML is generated, you need to get it out of Make.com. Good options include:</p>
+        <ul>
+            <li><strong>Email:</strong> Use the "Send an Email" module to email the HTML content to yourself.</li>
+            <li><strong>Google Drive / Dropbox:</strong> Use the "Upload a File" module to save the content as a `.html` file in a dedicated folder.</li>
+            <li><strong>GitHub (Advanced):</strong> For a fully automated deployment, you could use the GitHub module to create a new file in your repository, which could then trigger a build and deploy action.</li>
+        </ul>
+        
+        <h2>Blog Post HTML Template for Make.com</h2>
+        <p>Copy the code below into a text aggregator or variable module in your Make.com scenario. This will produce a complete, styled HTML file ready for publishing.</p>
+        <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;link rel="icon" type="image/png" href="https://webexpert.world.masonryresto.com/wp-content/uploads/2025/10/Find-A-Name-Logo-1.png" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    
+    &lt;!-- SEO: Fill these in or generate them with AI! --&gt;
+    &lt;title&gt;{{1.title}} | FindAName.live Blog&lt;/title&gt;
+    &lt;meta name="description" content="A short, compelling description of the blog post." /&gt;
+    
+    &lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;
+    &lt;style&gt;
+        .article-content h2 {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+            font-weight: 700;
+            color: #dbeafe; /* blue-200 */
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 0.5rem;
+        }
+        .article-content p {
+            margin-bottom: 1.5rem;
+            line-height: 1.75;
+        }
+        .article-content ul {
+            list-style-type: disc;
+            padding-left: 2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.75;
+        }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body class="bg-gradient-to-br from-[#0a1024] to-[#0d183a] text-white font-sans"&gt;
+    &lt;header class="py-6 px-4"&gt;
+      &lt;div class="container mx-auto flex justify-between items-center"&gt;
+        &lt;a href="/" class="flex items-center gap-2 flex-shrink-0"&gt;
+          &lt;div class="bg-white p-2 rounded-xl shadow-lg"&gt;
+            &lt;img src="https://webexpert.world.masonryresto.com/wp-content/uploads/2025/10/Find-A-Name-Logo-1.png" alt="FindAName.live Logo" class="h-12 w-auto" /&gt;
+          &lt;/div&gt;
+        &lt;/a&gt;
+        &lt;nav class="hidden md:flex flex-grow justify-center items-center gap-x-6 lg:gap-x-8"&gt;
+            &lt;a href="/dns-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium"&gt;DNS Lookup&lt;/a&gt;
+            &lt;a href="/whois-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium"&gt;WHOIS&lt;/a&gt;
+            &lt;a href="/seo-checker.html" class="text-blue-200/80 hover:text-white transition-colors font-medium"&gt;SEO Checker&lt;/a&gt;
+            &lt;a href="/domain-value-calculator.html" class="text-blue-200/80 hover:text-white transition-colors font-medium"&gt;Domain Value&lt;/a&gt;
+            &lt;a href="/blog/" class="text-blue-200/80 hover:text-white transition-colors font-medium"&gt;Blog&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;div class="w-24 hidden md:block"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/header&gt;
+
+    &lt;main class="container mx-auto px-4 py-8 md:py-12 text-blue-100/80"&gt;
+      &lt;div class="max-w-3xl mx-auto"&gt;
+        &lt;article&gt;
+            &lt;a href="/blog/" class="text-blue-400 hover:text-teal-300 font-semibold mb-6 inline-block"&gt;&larr; Back to Blog&lt;/a&gt;
+            &lt;h1 class="text-4xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-300"&gt;{{1.title}}&lt;/h1&gt;
+            &lt;p class="text-lg text-blue-200/70 mb-6"&gt;Published on {{formatDate(now; "MMMM D, YYYY")}} by Alex Chen&lt;/p&gt;
+            
+            &lt;!-- Find a relevant image on unsplash.com and paste the URL here --&gt;
+            &lt;img src="https://images.unsplash.com/photo-1550745165-9bc0b252726a?q=80&w=1200&auto=format&fit=crop" alt="A descriptive alt text for the image" class="rounded-xl shadow-lg mb-8 w-full"&gt;
+
+            &lt;div class="article-content text-lg"&gt;
+                {{2.choices[].text}}
+            &lt;/div&gt;
+        &lt;/article&gt;
+      &lt;/div&gt;
+    &lt;/main&gt;
+
+    &lt;footer class="py-6 px-4 mt-12 border-t border-white/10"&gt;
+      &lt;div class="container mx-auto text-center text-blue-200/60"&gt;
+        &lt;p&gt;&amp;copy; {{formatDate(now; "YYYY")}} FindAName.live. All rights reserved.&lt;/p&gt;
+        &lt;div class="mt-2 space-x-4"&gt;
+          &lt;a href="/privacy.html" class="hover:text-blue-300 transition-colors"&gt;Privacy Policy&lt;/a&gt;
+          &lt;span&gt;|&lt;/span&gt;
+          &lt;a href="/terms.html" class="hover:text-blue-300 transition-colors"&gt;Terms of Service&lt;/a&gt;
+          &lt;span&gt;|&lt;/span&gt;
+          &lt;a href="/contact.html" class="hover:text-blue-300 transition-colors"&gt;Contact&lt;/a&gt;
+          &lt;span&gt;|&lt;/span&gt;
+          &lt;a href="/automation-guide.html" class="hover:text-blue-300 transition-colors"&gt;Automation Guide&lt;/a&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/footer&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      </div>
+    </main>
+
+    <footer class="py-6 px-4 mt-12 border-t border-white/10">
+      <div class="container mx-auto text-center text-blue-200/60">
+        <p>&copy; 2024 FindAName.live. All rights reserved.</p>
+        <div class="mt-2 space-x-4">
+          <a href="/privacy.html" class="hover:text-blue-300 transition-colors">Privacy Policy</a>
+          <span>|</span>
+          <a href="/terms.html" class="hover:text-blue-300 transition-colors">Terms of Service</a>
+          <span>|</span>
+          <a href="/contact.html" class="hover:text-blue-300 transition-colors">Contact</a>
+          <span>|</span>
+          <a href="/automation-guide.html" class="hover:text-blue-300 transition-colors">Automation Guide</a>
+        </div>
+      </div>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        document.querySelector('footer p').innerHTML = `&copy; ${new Date().getFullYear()} FindAName.live. All rights reserved.`;
+    </script>
+  </body>
+</html>

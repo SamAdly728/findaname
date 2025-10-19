@@ -11,6 +11,8 @@ export const Footer: React.FC = () => {
           <a href="/terms.html" className="hover:text-blue-300 transition-colors">Terms of Service</a>
           <span>|</span>
           <a href="/contact.html" className="hover:text-blue-300 transition-colors">Contact</a>
+           <span>|</span>
+          <a href="/automation-guide.html" className="hover:text-blue-300 transition-colors">Automation Guide</a>
         </div>
       </div>
     </footer>
