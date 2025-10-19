@@ -45,6 +45,13 @@
         .prose strong {
             color: #f0f9ff;
         }
+        .prose a {
+            color: #60a5fa; /* blue-400 */
+            text-decoration: underline;
+        }
+        .prose a:hover {
+            color: #5eead4; /* teal-300 */
+        }
         .prose code {
             background-color: rgba(255,255,255,0.1);
             padding: 0.2em 0.4em;
@@ -85,18 +92,27 @@
         <h1 class="text-4xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-300">Automating Blog Posts with Make.com</h1>
         <p class="text-lg text-blue-200/70">A guide to generating and publishing content for your static site using AI and automation.</p>
 
-        <p>One of the best things about a static website is its speed and security. However, this can make content updates, like adding a new blog post, feel like a manual process. But what if you could automate most of it? This guide will show you how to build a powerful content creation workflow using Make.com (formerly Integromat) and AI, allowing you to generate and format a complete blog post that you can then easily add to your site.</p>
+        <p>One of the best things about a static website is its speed and security. However, this can make content updates, like adding a new blog post, feel like a manual process. But what if you could automate most of it? This guide will show you how to build a powerful content creation workflow using <a href="https://www.make.com/en/register?pc=findaname" target="_blank" rel="noopener sponsored">Make.com</a> (formerly Integromat) and AI, allowing you to generate and format a complete blog post that you can then easily add to your site.</p>
+        
+        <div class="my-8 bg-white/10 p-6 rounded-lg border border-white/20">
+            <h3 class="!mt-0">Get Started with Make.com</h3>
+            <p>To follow this guide, you'll need a Make.com account. Their powerful platform has a free tier that's perfect for getting started with automation.</p>
+            <a href="https://www.make.com/en/register?pc=findaname" target="_blank" rel="noopener sponsored" class="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-500 transition-colors no-underline">
+                Sign Up for Make.com for Free
+            </a>
+            <p class="text-sm text-blue-200/70 mt-3"><em>Full disclosure: This is an affiliate link. If you sign up and eventually upgrade, we may earn a commission at no extra cost to you. It helps support this site!</em></p>
+        </div>
 
         <h2>The Concept: A "Pseudo-Automation" Workflow</h2>
-        <p>Since this is a static site without a database or CMS, we can't have Make.com *directly* publish a new post. Instead, we'll create a scenario that does 95% of the work: it will take a title, use AI to write a full article, and then format it into a complete HTML file. The final step is for you to simply copy this HTML, create a new file in your project (e.g., `post-4-new-article.html`), and deploy the site.</p>
+        <p>Since this is a static site without a database or CMS, we can't have <a href="https://www.make.com/en/register?pc=findaname" target="_blank" rel="noopener sponsored">Make.com</a> *directly* publish a new post. Instead, we'll create a scenario that does 95% of the work: it will take a title, use AI to write a full article, and then format it into a complete HTML file. The final step is for you to simply copy this HTML, create a new file in your project (e.g., `post-4-new-article.html`), and deploy the site.</p>
         
         <p>This workflow saves you hours of writing, formatting, and coding for each new article.</p>
 
         <h2>The Make.com Scenario</h2>
-        <p>Here’s a breakdown of the modules you would use in your Make.com scenario:</p>
+        <p>Here’s a breakdown of the modules you would use in your <a href="https://www.make.com/en/register?pc=findaname" target="_blank" rel="noopener sponsored">Make.com</a> scenario:</p>
         
         <h3>1. The Trigger: How to Start the Process</h3>
-        <p>You need a way to tell Make.com to create a new post. Here are a few great options:</p>
+        <p>You need a way to tell <a href="https://www.make.com/en/register?pc=findaname" target="_blank" rel="noopener sponsored">Make.com</a> to create a new post. Here are a few great options:</p>
         <ul>
             <li><strong>Webhook:</strong> The most flexible option. You can create a simple form or even just trigger it manually to start the scenario.</li>
             <li><strong>Airtable:</strong> Create a simple base with a "Title" field and a "Status" field. The scenario can trigger whenever a new record is added or when the status is changed to "Ready to Write".</li>
@@ -104,7 +120,7 @@
         </ul>
 
         <h3>2. The AI Writer: Generating the Content</h3>
-        <p>This is where the magic happens. Use the <strong>OpenAI (ChatGPT)</strong> or <strong>Google Gemini</strong> module in Make.com.</p>
+        <p>This is where the magic happens. Use the <strong>OpenAI (ChatGPT)</strong> or <strong>Google Gemini</strong> module in <a href="https://www.make.com/en/register?pc=findaname" target="_blank" rel="noopener sponsored">Make.com</a>.</p>
         <ul>
             <li>Connect your AI service account.</li>
             <li>Choose the "Create a Completion" or similar action.</li>
@@ -126,7 +142,7 @@ Do not include a main title (H1) in your response, as that will be added in the 
         <p><strong>Note:</strong> In the template below, you'll need to replace `{{2.choices[].text}}` with the variable from your AI module that contains the generated article content. You'll also replace `{{1.title}}` with the variable from your trigger module.</p>
         
         <h3>4. The Output: Getting Your HTML File</h3>
-        <p>Once the HTML is generated, you need to get it out of Make.com. Good options include:</p>
+        <p>Once the HTML is generated, you need to get it out of <a href="https://www.make.com/en/register?pc=findaname" target="_blank" rel="noopener sponsored">Make.com</a>. Good options include:</p>
         <ul>
             <li><strong>Email:</strong> Use the "Send an Email" module to email the HTML content to yourself.</li>
             <li><strong>Google Drive / Dropbox:</strong> Use the "Upload a File" module to save the content as a `.html` file in a dedicated folder.</li>
@@ -134,7 +150,7 @@ Do not include a main title (H1) in your response, as that will be added in the 
         </ul>
         
         <h2>Blog Post HTML Template for Make.com</h2>
-        <p>Copy the code below into a text aggregator or variable module in your Make.com scenario. This will produce a complete, styled HTML file ready for publishing.</p>
+        <p>Copy the code below into a text aggregator or variable module in your <a href="https://www.make.com/en/register?pc=findaname" target="_blank" rel="noopener sponsored">Make.com</a> scenario. This will produce a complete, styled HTML file ready for publishing.</p>
         <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
   &lt;head&gt;
