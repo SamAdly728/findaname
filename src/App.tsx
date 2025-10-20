@@ -3,7 +3,6 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { DomainCard } from './components/DomainCard';
 import { WhoisModal } from './components/WhoisModal';
-import { AdsenseBlock } from './components/AdsenseBlock';
 import { ProgressBar } from './components/ProgressBar';
 import { generateDomains, checkAvailability, getWhoisInfo } from './services/geminiService';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -191,10 +190,8 @@ const App: React.FC = () => {
         {isLoading && (
           <ProgressBar progress={progress} text={progressText} />
         )}
-
-        <div className="max-w-2xl mx-auto">
-          <AdsenseBlock slot="5928091834" />
-        </div>
+        
+        {/* AdSense block removed. Auto ads will be handled by the script in index.html */}
         
         <div ref={resultsRef}>
           {!isLoading && domains.length > 0 && (
@@ -221,6 +218,17 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* New CTA Section */}
+      <div className="container mx-auto px-4 -mt-4 mb-12">
+        <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-600/30 to-teal-500/30 rounded-xl shadow-lg p-8 text-center border border-white/20">
+            <h2 className="text-3xl font-bold text-white mb-3">Need a Developer to Bring Your Idea to Life?</h2>
+            <p className="text-blue-100/90 mb-6 max-w-2xl mx-auto">You've found the perfect domain. If you need help building a stunning, high-performance website, our team of experts is ready to assist. Let's chat about your project!</p>
+            <a href="https://wa.me/639495868221" target="_blank" rel="noopener noreferrer" className="inline-block bg-white text-blue-600 font-semibold px-8 py-3 rounded-lg hover:bg-gray-200 transition-colors transform hover:scale-105">
+                Chat With Us on WhatsApp
+            </a>
+        </div>
+      </div>
 
       {isModalOpen && selectedDomain && (
         <WhoisModal
