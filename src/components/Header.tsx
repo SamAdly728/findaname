@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MenuIcon, CloseIcon, GlobeIcon } from './icons/Icons';
 
+// Define google translate type on window
+declare global {
+  interface Window {
+    google: any;
+    googleTranslateElementInit: () => void;
+  }
+}
+
 export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
@@ -29,9 +37,49 @@ export const Header: React.FC = () => {
     };
   }, [langMenuRef]);
 
+  // Google Translate setup
+  useEffect(() => {
+    const googleTranslateElementInit = () => {
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: 'en',
+          includedLanguages: 'en,fr,de,es,ar',
+          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false,
+        },
+        'google_translate_element'
+      );
+    };
+
+    window.googleTranslateElementInit = googleTranslateElementInit;
+
+    const scriptId = 'google-translate-script';
+    if (!document.getElementById(scriptId)) {
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        script.async = true;
+        document.body.appendChild(script);
+    }
+  }, []);
+
+  const changeLanguage = (lang: string) => {
+    const googleTranslateElement = document.getElementById('google_translate_element');
+    if (googleTranslateElement) {
+      // FIX: Cast the result of querySelector to HTMLSelectElement to access the 'value' property.
+      const langSelect = googleTranslateElement.querySelector<HTMLSelectElement>('select.goog-te-combo');
+      if (langSelect) {
+        langSelect.value = lang;
+        langSelect.dispatchEvent(new Event('change'));
+      }
+    }
+    setIsLangMenuOpen(false);
+  };
+
 
   return (
     <header className="py-6 px-4">
+      <div id="google_translate_element" style={{ display: 'none' }}></div>
       <div className="container mx-auto flex justify-between items-center">
         <a href="/" className="flex items-center gap-2 flex-shrink-0 z-50">
           <div className="bg-white p-2 rounded-xl shadow-lg">
@@ -53,11 +101,11 @@ export const Header: React.FC = () => {
                 </button>
                 {isLangMenuOpen && (
                     <div className="absolute top-full right-0 mt-2 w-48 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-xl py-2 animate-fade-in-down">
-                        <a href="/" className="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">English</a>
-                        <a href="/fr/" className="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Français</a>
-                        <a href="/de/" className="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Deutsch</a>
-                        <a href="/es/" className="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Español</a>
-                        <a href="/ar/" className="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10" dir="rtl">العربية</a>
+                        <button onClick={() => changeLanguage('en')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">English</button>
+                        <button onClick={() => changeLanguage('fr')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Français</button>
+                        <button onClick={() => changeLanguage('de')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Deutsch</button>
+                        <button onClick={() => changeLanguage('es')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Español</button>
+                        <button onClick={() => changeLanguage('ar')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10" dir="rtl">العربية</button>
                     </div>
                 )}
             </div>

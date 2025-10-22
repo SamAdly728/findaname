@@ -54,8 +54,10 @@
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "tqo76n2ng4");
     </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
   </head>
   <body class="bg-gradient-to-br from-[#0a1024] to-[#0d183a] text-white font-sans">
+    <div id="google_translate_element" style="display: none;"></div>
     <header class="py-6 px-4">
       <div class="container mx-auto flex justify-between items-center">
         <a href="/" class="flex items-center gap-2 flex-shrink-0 z-50">
@@ -79,11 +81,11 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7 text-white"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                 </button>
                 <div id="lang-menu" class="absolute top-full right-0 mt-2 w-48 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-xl py-2 hidden">
-                    <a href="/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">English</a>
-                    <a href="/fr/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Français</a>
-                    <a href="/de/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Deutsch</a>
-                    <a href="/es/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Español</a>
-                    <a href="/ar/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10" dir="rtl">العربية</a>
+                    <a href="#" onclick="return changeLanguage('en');" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">English</a>
+                    <a href="#" onclick="return changeLanguage('fr');" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Français</a>
+                    <a href="#" onclick="return changeLanguage('de');" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Deutsch</a>
+                    <a href="#" onclick="return changeLanguage('es');" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Español</a>
+                    <a href="#" onclick="return changeLanguage('ar');" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10" dir="rtl">العربية</a>
                 </div>
             </div>
             
@@ -192,6 +194,34 @@
         </div>
       </div>
     </footer>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+          pageLanguage: 'en',
+          includedLanguages: 'en,fr,de,es,ar',
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false
+        }, 'google_translate_element');
+      }
+    
+      function changeLanguage(lang) {
+        var googleTranslateElement = document.getElementById('google_translate_element');
+        if (googleTranslateElement) {
+          var langSelect = googleTranslateElement.querySelector('select.goog-te-combo');
+          if (langSelect) {
+            langSelect.value = lang;
+            var event = new Event('change');
+            langSelect.dispatchEvent(event);
+          }
+        }
+        // Also close the dropdown
+        var langMenu = document.getElementById('lang-menu');
+        if (langMenu) {
+            langMenu.classList.add('hidden');
+        }
+        return false; // Prevent default anchor behavior
+      }
+    </script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('footer p').innerHTML = `&copy; ${new Date().getFullYear()} FindAName.live. All rights reserved.`;
