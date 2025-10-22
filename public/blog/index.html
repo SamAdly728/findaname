@@ -28,6 +28,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-8050638035807727">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8050638035807727"
      crossorigin="anonymous"></script>
 
@@ -42,21 +43,55 @@
   <body class="bg-gradient-to-br from-[#0a1024] to-[#0d183a] text-white font-sans">
     <header class="py-6 px-4">
       <div class="container mx-auto flex justify-between items-center">
-        <a href="/" class="flex items-center gap-2 flex-shrink-0">
+        <a href="/" class="flex items-center gap-2 flex-shrink-0 z-50">
           <div class="bg-white p-2 rounded-xl shadow-lg">
             <img src="https://webexpert.world.masonryresto.com/wp-content/uploads/2025/10/Find-A-Name-Logo-1.png" alt="FindAName.live Logo" class="h-12 w-auto" />
           </div>
         </a>
-        <nav class="hidden md:flex flex-grow justify-center items-center gap-x-6 lg:gap-x-8">
+        <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-x-6 lg:gap-x-8">
             <a href="/dns-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">DNS Lookup</a>
             <a href="/whois-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
             <a href="/seo-checker.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">SEO Checker</a>
             <a href="/domain-value-calculator.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">Domain Value</a>
             <a href="/blog/" class="text-blue-200/80 hover:text-white transition-colors font-medium">Blog</a>
         </nav>
-        <div class="w-24 hidden md:block"></div>
+        
+        <!-- Right side controls -->
+        <div class="flex items-center gap-2 z-50">
+            <!-- Language Switcher -->
+            <div class="relative">
+                <button id="lang-menu-button" aria-label="Select language" class="p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7 text-white"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                </button>
+                <div id="lang-menu" class="absolute top-full right-0 mt-2 w-48 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-xl py-2 hidden">
+                    <a href="/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">English</a>
+                    <a href="/fr/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Français</a>
+                    <a href="/de/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Deutsch</a>
+                    <a href="/es/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Español</a>
+                    <a href="/ar/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10" dir="rtl">العربية</a>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" aria-label="Toggle menu" class="p-2">
+                    <svg id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-white"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    <svg id="menu-close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-white hidden"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
       </div>
     </header>
+     <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-gradient-to-br from-[#0a1024] to-[#0d183a] z-40 transform translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+      <nav class="flex flex-col items-center justify-center h-full gap-y-8 text-2xl">
+        <a href="/dns-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">DNS Lookup</a>
+        <a href="/whois-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
+        <a href="/seo-checker.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">SEO Checker</a>
+        <a href="/domain-value-calculator.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">Domain Value</a>
+        <a href="/blog/" class="text-blue-200/80 hover:text-white transition-colors font-medium">Blog</a>
+      </nav>
+    </div>
 
     <main class="container mx-auto px-4 py-8 md:py-12 text-blue-100/80">
       <div class="max-w-4xl mx-auto">
@@ -96,101 +131,4 @@
                 <div role="img" aria-label="A team collaborating around a table with colorful sticky notes, representing branding strategy." style="background-image: url('https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?q=80&w=1200&auto=format&fit=crop')" class="w-full h-48 bg-cover bg-center"></div>
                 <div class="p-6 flex flex-col flex-grow">
                     <h2 class="text-2xl font-bold text-blue-100 mb-3 group-hover:text-teal-300 transition-colors">The Art of the Brandable Domain: 7 AI-Powered Strategies</h2>
-                    <p class="text-blue-200/80 mb-4 flex-grow">A great domain name is more than just an address; it's the cornerstone of your brand. It should be memorable, catchy, and meaningful. But how do you find one in a crowded digital world?...</p>
-                    <div class="mt-auto text-sm font-semibold text-blue-400">Read More &rarr;</div>
-                </div>
-            </a>
-
-            <!-- Post 3 Card -->
-            <a href="/blog/post-3-beginners-guide-to-seo.html" class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/20 hover:scale-[1.03]">
-                <div role="img" aria-label="A laptop screen displaying various colorful graphs and charts for SEO analytics." style="background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop')" class="w-full h-48 bg-cover bg-center"></div>
-                <div class="p-6 flex flex-col flex-grow">
-                    <h2 class="text-2xl font-bold text-blue-100 mb-3 group-hover:text-teal-300 transition-colors">From Name to Fame: A Beginner's Guide to SEO for Your New Domain</h2>
-                    <p class="text-blue-200/80 mb-4 flex-grow">Congratulations, you've used FindAName.live to secure the perfect domain! But what's next? A great name is just the beginning. To get discovered, you need to master the basics of SEO...</p>
-                    <div class="mt-auto text-sm font-semibold text-blue-400">Read More &rarr;</div>
-                </div>
-            </a>
-
-            <!-- Post 4 Card -->
-            <a href="/blog/post-4-domain-flipping.html" class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/20 hover:scale-[1.03]">
-                <div role="img" aria-label="Two hands exchanging cash, symbolizing a profitable transaction or investment." style="background-image: url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1200&auto=format&fit=crop')" class="w-full h-48 bg-cover bg-center"></div>
-                <div class="p-6 flex flex-col flex-grow">
-                    <h2 class="text-2xl font-bold text-blue-100 mb-3 group-hover:text-teal-300 transition-colors">Domain Flipping 101: A Guide to Buying and Selling for Profit</h2>
-                    <p class="text-blue-200/80 mb-4 flex-grow">Think of domain names as digital real estate. Domain flipping is the art of buying undervalued domains and selling them for a profit. This guide covers how to find valuable domains and strategies for selling...</p>
-                    <div class="mt-auto text-sm font-semibold text-blue-400">Read More &rarr;</div>
-                </div>
-            </a>
-            
-            <!-- Post 5 Card -->
-            <a href="/blog/post-5-ai-web-design.html" class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/20 hover:scale-[1.03]">
-                <div role="img" aria-label="Abstract glowing lines of data forming a soundwave pattern, representing artificial intelligence." style="background-image: url('https://images.unsplash.com/photo-1511376777868-611b54f68947?q=80&w=1200&auto=format=fit=crop')" class="w-full h-48 bg-cover bg-center"></div>
-                <div class="p-6 flex flex-col flex-grow">
-                    <h2 class="text-2xl font-bold text-blue-100 mb-3 group-hover:text-teal-300 transition-colors">The AI Revolution: How Artificial Intelligence is Changing Web Design</h2>
-                    <p class="text-blue-200/80 mb-4 flex-grow">Artificial intelligence is no longer science fiction; it's a powerful tool that's reshaping the web design landscape. From generating code to creating personalized user experiences, AI is unlocking new efficiencies...</p>
-                    <div class="mt-auto text-sm font-semibold text-blue-400">Read More &rarr;</div>
-                </div>
-            </a>
-            
-            <!-- Post 6 Card -->
-            <a href="/blog/post-6-local-seo.html" class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/20 hover:scale-[1.03]">
-                <div role="img" aria-label="A warm, inviting interior of a local coffee shop, representing a local business." style="background-image: url('https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1200&auto=format&fit=crop')" class="w-full h-48 bg-cover bg-center"></div>
-                <div class="p-6 flex flex-col flex-grow">
-                    <h2 class="text-2xl font-bold text-blue-100 mb-3 group-hover:text-teal-300 transition-colors">Getting on the Map: A Beginner's Guide to Local SEO</h2>
-                    <p class="text-blue-200/80 mb-4 flex-grow">For businesses with a physical location, ranking in global search results isn't enough. You need to dominate the local search pack. This guide covers the essentials of Local SEO to help you get found by nearby customers...</p>
-                    <div class="mt-auto text-sm font-semibold text-blue-400">Read More &rarr;</div>
-                </div>
-            </a>
-            
-            <!-- Post 7 Card -->
-            <a href="/blog/post-7-trademark-guide.html" class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/20 hover:scale-[1.03]">
-                <div role="img" aria-label="A person's hands signing a formal legal document with a fountain pen, symbolizing a trademark agreement." style="background-image: url('https://images.unsplash.com/photo-1612232233989-9b9f74512d21?q=80&w=1200&auto=format&fit=crop')" class="w-full h-48 bg-cover bg-center"></div>
-                <div class="p-6 flex flex-col flex-grow">
-                    <h2 class="text-2xl font-bold text-blue-100 mb-3 group-hover:text-teal-300 transition-colors">Protect Your Brand: A Simple Guide to Trademarking Your Domain</h2>
-                    <p class="text-blue-200/80 mb-4 flex-grow">Your domain name is more than an address; it's a critical brand asset. But domain registration alone doesn't give you legal rights to the name. Learn the why, when, and how of trademarking your domain...</p>
-                    <div class="mt-auto text-sm font-semibold text-blue-400">Read More &rarr;</div>
-                </div>
-            </a>
-            
-            <!-- Post 8 Card -->
-            <a href="/blog/post-8-naming-psychology.html" class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/20 hover:scale-[1.03]">
-                <div role="img" aria-label="A single bright lightbulb hanging in a misty, dark forest, symbolizing a creative idea." style="background-image: url('https://images.unsplash.com/photo-1528716321680-815a8cdb8cbe?q=80&w=1200&auto=format&fit=crop')" class="w-full h-48 bg-cover bg-center"></div>
-                <div class="p-6 flex flex-col flex-grow">
-                    <h2 class="text-2xl font-bold text-blue-100 mb-3 group-hover:text-teal-300 transition-colors">The Psychology of Naming: What Makes a Domain Name Stick?</h2>
-                    <p class="text-blue-200/80 mb-4 flex-grow">Why are some names instantly memorable while others are forgotten in seconds? The answer lies in psychology. Dive into the science of what makes a domain name truly stick in the minds of your customers...</p>
-                    <div class="mt-auto text-sm font-semibold text-blue-400">Read More &rarr;</div>
-                </div>
-            </a>
-
-            <!-- Post 9 Card -->
-            <a href="/blog/post-9-tld-deep-dive.html" class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/20 hover:scale-[1.03]">
-                <div role="img" aria-label="Close-up of a computer screen with green, matrix-style falling code, representing the technical side of the internet." style="background-image: url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1200&auto=format&fit=crop')" class="w-full h-48 bg-cover bg-center"></div>
-                <div class="p-6 flex flex-col flex-grow">
-                    <h2 class="text-2xl font-bold text-blue-100 mb-3 group-hover:text-teal-300 transition-colors">From .com to .xyz: A Deep Dive into the Most Popular TLDs</h2>
-                    <p class="text-blue-200/80 mb-4 flex-grow">The TLD you choose says a lot about your brand. This comprehensive guide breaks down the pros, cons, and best use cases for the most popular domain extensions, from the classic .com to modern alternatives...</p>
-                    <div class="mt-auto text-sm font-semibold text-blue-400">Read More &rarr;</div>
-                </div>
-            </a>
-            
-        </div>
-      </div>
-    </main>
-
-    <footer class="py-6 px-4 mt-12 border-t border-white/10">
-      <div class="container mx-auto text-center text-blue-200/60">
-        <p>&copy; 2024 FindAName.live. All rights reserved.</p>
-        <div class="mt-2 space-x-4">
-          <a href="/privacy.html" class="hover:text-blue-300 transition-colors">Privacy Policy</a>
-          <span>|</span>
-          <a href="/terms.html" class="hover:text-blue-300 transition-colors">Terms of Service</a>
-          <span>|</span>
-          <a href="/contact.html" class="hover:text-blue-300 transition-colors">Contact</a>
-          <span>|</span>
-          <a href="/automation-guide.html" class="hover:text-blue-300 transition-colors">Automation Guide</a>
-        </div>
-      </div>
-    </footer>
-    <script>
-        document.querySelector('footer p').innerHTML = `&copy; ${new Date().getFullYear()} FindAName.live. All rights reserved.`;
-    </script>
-  </body>
-</html>
+                    <p class="text-blue-200/80 mb-4 flex-grow">A great domain name is more than just an address; it's the cornerstone of your brand. It should be memorable, catchy, and meaningful. But how do you find one in a crowded digital world?...</p

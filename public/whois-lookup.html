@@ -12,6 +12,14 @@
     <link rel="canonical" href="https://findaname.live/whois-lookup.html" />
     <meta name="robots" content="index, follow" />
 
+    <!-- International SEO -->
+    <link rel="alternate" hreflang="x-default" href="https://findaname.live/whois-lookup.html" />
+    <link rel="alternate" hreflang="en" href="https://findaname.live/whois-lookup.html" />
+    <link rel="alternate" hreflang="fr" href="https://findaname.live/fr/whois-lookup.html" />
+    <link rel="alternate" hreflang="de" href="https://findaname.live/de/whois-lookup.html" />
+    <link rel="alternate" hreflang="ar" href="https://findaname.live/ar/whois-lookup.html" />
+    <link rel="alternate" hreflang="es" href="https://findaname.live/es/whois-lookup.html" />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://findaname.live/whois-lookup.html">
@@ -28,6 +36,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-8050638035807727">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8050638035807727"
      crossorigin="anonymous"></script>
 
@@ -62,21 +71,56 @@
   <body class="bg-gradient-to-br from-[#0a1024] to-[#0d183a] text-white font-sans">
     <header class="py-6 px-4">
       <div class="container mx-auto flex justify-between items-center">
-        <a href="/" class="flex items-center gap-2 flex-shrink-0">
+        <a href="/" class="flex items-center gap-2 flex-shrink-0 z-50">
           <div class="bg-white p-2 rounded-xl shadow-lg">
             <img src="https://webexpert.world.masonryresto.com/wp-content/uploads/2025/10/Find-A-Name-Logo-1.png" alt="FindAName.live Logo" class="h-12 w-auto" />
           </div>
         </a>
-        <nav class="hidden md:flex flex-grow justify-center items-center gap-x-6 lg:gap-x-8">
+        <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-x-6 lg:gap-x-8">
             <a href="/dns-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">DNS Lookup</a>
             <a href="/whois-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
             <a href="/seo-checker.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">SEO Checker</a>
             <a href="/domain-value-calculator.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">Domain Value</a>
             <a href="https://blog.findaname.live/" target="_blank" rel="noopener noreferrer" class="text-blue-200/80 hover:text-white transition-colors font-medium">Blog</a>
         </nav>
-        <div class="w-24 hidden md:block"></div>
+        
+        <!-- Right side controls -->
+        <div class="flex items-center gap-2 z-50">
+            <!-- Language Switcher -->
+            <div class="relative">
+                <button id="lang-menu-button" aria-label="Select language" class="p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7 text-white"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                </button>
+                <div id="lang-menu" class="absolute top-full right-0 mt-2 w-48 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-xl py-2 hidden">
+                    <a href="/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">English</a>
+                    <a href="/fr/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Français</a>
+                    <a href="/de/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Deutsch</a>
+                    <a href="/es/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Español</a>
+                    <a href="/ar/" class="block px-4 py-2 text-sm text-blue-100 hover:bg-white/10" dir="rtl">العربية</a>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" aria-label="Toggle menu" class="p-2">
+                    <svg id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-white"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    <svg id="menu-close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-white hidden"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
       </div>
     </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-gradient-to-br from-[#0a1024] to-[#0d183a] z-40 transform translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+      <nav class="flex flex-col items-center justify-center h-full gap-y-8 text-2xl">
+        <a href="/dns-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">DNS Lookup</a>
+        <a href="/whois-lookup.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
+        <a href="/seo-checker.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">SEO Checker</a>
+        <a href="/domain-value-calculator.html" class="text-blue-200/80 hover:text-white transition-colors font-medium">Domain Value</a>
+        <a href="https://blog.findaname.live/" target="_blank" rel="noopener noreferrer" class="text-blue-200/80 hover:text-white transition-colors font-medium">Blog</a>
+      </nav>
+    </div>
 
     <main class="container mx-auto px-4 py-8 md:py-12 text-blue-100/80">
       <div class="max-w-3xl mx-auto text-center bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg p-8">
@@ -142,7 +186,7 @@
 
     <footer class="py-6 px-4 mt-12 border-t border-white/10">
       <div class="container mx-auto text-center text-blue-200/60">
-        <p>&copy; 2023 FindAName.live. All rights reserved.</p>
+        <p>&copy; 2024 FindAName.live. All rights reserved.</p>
         <div class="mt-2 space-x-4">
           <a href="/privacy.html" class="hover:text-blue-300 transition-colors">Privacy Policy</a>
           <span>|</span>
@@ -155,7 +199,41 @@
       </div>
     </footer>
     <script>
+      document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('footer p').innerHTML = `&copy; ${new Date().getFullYear()} FindAName.live. All rights reserved.`;
+        
+        // Mobile menu logic
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const openIcon = document.getElementById('menu-open-icon');
+        const closeIcon = document.getElementById('menu-close-icon');
+
+        if (menuButton && mobileMenu && openIcon && closeIcon) {
+          menuButton.addEventListener('click', function () {
+            mobileMenu.classList.toggle('translate-x-full');
+            openIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+          });
+        }
+        
+        // Language menu logic
+        const langMenuButton = document.getElementById('lang-menu-button');
+        const langMenu = document.getElementById('lang-menu');
+        
+        if (langMenuButton && langMenu) {
+            langMenuButton.addEventListener('click', function (event) {
+                event.stopPropagation();
+                langMenu.classList.toggle('hidden');
+            });
+        }
+        
+        // Close dropdowns if clicking outside
+        document.addEventListener('click', function (event) {
+            if (langMenu && !langMenu.classList.contains('hidden') && !langMenuButton.contains(event.target)) {
+                langMenu.classList.add('hidden');
+            }
+        });
+      });
     </script>
     <script type="module" src="/tools.js" defer></script>
   </body>
