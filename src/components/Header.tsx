@@ -64,16 +64,10 @@ export const Header: React.FC = () => {
   }, []);
 
   const changeLanguage = (lang: string) => {
-    const googleTranslateElement = document.getElementById('google_translate_element');
-    if (googleTranslateElement) {
-      // FIX: Cast the result of querySelector to HTMLSelectElement to access the 'value' property.
-      const langSelect = googleTranslateElement.querySelector<HTMLSelectElement>('select.goog-te-combo');
-      if (langSelect) {
-        langSelect.value = lang;
-        langSelect.dispatchEvent(new Event('change'));
-      }
-    }
-    setIsLangMenuOpen(false);
+    // Set the cookie that Google Translate widget reads on load
+    document.cookie = `googtrans=/en/${lang}; path=/`;
+    // Reload the page for the cookie to be read and translation applied
+    window.location.reload();
   };
 
 

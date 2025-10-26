@@ -209,20 +209,11 @@
       }
     
       function changeLanguage(lang) {
-        var googleTranslateElement = document.getElementById('google_translate_element');
-        if (googleTranslateElement) {
-          var langSelect = googleTranslateElement.querySelector('select.goog-te-combo');
-          if (langSelect) {
-            langSelect.value = lang;
-            var event = new Event('change');
-            langSelect.dispatchEvent(event);
-          }
-        }
-        // Also close the dropdown
-        var langMenu = document.getElementById('lang-menu');
-        if (langMenu) {
-            langMenu.classList.add('hidden');
-        }
+        // Set the cookie that Google Translate widget reads on load
+        document.cookie = `googtrans=/en/${lang}; path=/`;
+        // Reload the page for the cookie to be read and translation applied
+        window.location.reload();
+
         return false; // Prevent default anchor behavior
       }
     </script>
