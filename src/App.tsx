@@ -219,6 +219,44 @@ const App: React.FC = () => {
         </div>
       </main>
 
+      {/* New Tools Section */}
+      <div className="container mx-auto px-4 my-16">
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-blue-200">
+            Explore Our Full Suite of Domain Tools
+          </h2>
+          <p className="text-lg text-blue-100/80 mb-10">
+            Everything you need to find, analyze, and value your next big idea.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <a href="/dns-lookup.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">DNS Lookup</h3>
+            <p className="text-blue-200/80">Check A, CNAME, MX, and other DNS records for any domain.</p>
+          </a>
+          <a href="/whois-lookup.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">WHOIS Lookup</h3>
+            <p className="text-blue-200/80">Find registration data, and ownership details for any domain.</p>
+          </a>
+          <a href="/seo-checker.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">SEO Checker</h3>
+            <p className="text-blue-200/80">Get a free technical SEO audit and performance score for your website.</p>
+          </a>
+          <a href="/domain-value-calculator.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">Domain Value Calculator</h3>
+            <p className="text-blue-200/80">Estimate the value of any domain with our AI-powered tool.</p>
+          </a>
+          <a href="/hosting-lookup.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">Hosting Checker</h3>
+            <p className="text-blue-200/80">Discover who is hosting any website instantly.</p>
+          </a>
+          <a href="/website-down-checker.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">Website Down Checker</h3>
+            <p className="text-blue-200/80">Check if a website is down for everyone or just you.</p>
+          </a>
+        </div>
+      </div>
+
       {/* New CTA Section */}
       <div className="container mx-auto px-4 -mt-4 mb-12">
         <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-600/30 to-teal-500/30 rounded-xl shadow-lg p-8 text-center border border-white/20">

@@ -178,6 +178,28 @@
             <p>This is useful for troubleshooting website issues, verifying DNS configuration changes, and seeing the infrastructure behind a domain. You can check common record types like A (IP address), MX (mail servers), CNAME (aliases), TXT (text records for verification), and more.</p>
         </div>
 
+        <div class="mt-12 text-left space-y-4">
+            <h2 class="text-2xl font-bold text-blue-200">Common DNS Record Types Explained</h2>
+            <div class="space-y-4">
+                <div class="bg-white/5 p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-300">A Record (Address)</h3>
+                    <p>The most basic type of DNS record. It points a domain or subdomain to an IPv4 address (e.g., 192.0.2.1). This is what your browser uses to find the server hosting a website.</p>
+                </div>
+                <div class="bg-white/5 p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-300">CNAME Record (Canonical Name)</h3>
+                    <p>Points one domain or subdomain to another domain name. For example, `www.example.com` might have a CNAME record pointing to `example.com`. This allows you to update one A record (`example.com`) and have all aliases follow suit.</p>
+                </div>
+                <div class="bg-white/5 p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-300">MX Record (Mail Exchange)</h3>
+                    <p>Directs email to a mail server. These records are critical for your email to function correctly, pointing to services like Google Workspace or Microsoft 365.</p>
+                </div>
+                <div class="bg-white/5 p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-300">TXT Record (Text)</h3>
+                    <p>Allows an administrator to store text notes in the DNS record. It's commonly used for verifying domain ownership for services like Google Search Console, or for email security protocols like SPF and DKIM.</p>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-12 text-center">
             <a href="/" class="inline-block px-8 py-3 bg-blue-600/50 hover:bg-blue-600/80 rounded-lg font-semibold transition-colors">
                 &larr; Back to Domain Generator
