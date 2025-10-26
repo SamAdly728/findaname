@@ -64,10 +64,19 @@ export const Header: React.FC = () => {
   }, []);
 
   const changeLanguage = (lang: string) => {
-    // Set the cookie that Google Translate widget reads on load
+    // 1. Set the cookie. This will handle translation for subsequent page loads.
     document.cookie = `googtrans=/en/${lang}; path=/`;
-    // Reload the page for the cookie to be read and translation applied
-    window.location.reload();
+
+    // 2. Try to change the language on the current page without reloading.
+    const selectElement = document.querySelector('select.goog-te-combo') as HTMLSelectElement;
+    if (selectElement) {
+        selectElement.value = lang;
+        selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+        // 3. If the widget is not ready, reload the page to apply the cookie.
+        console.warn('Google Translate widget not found. Falling back to cookie-based reload.');
+        window.location.reload();
+    }
   };
 
 
@@ -95,11 +104,11 @@ export const Header: React.FC = () => {
                 </button>
                 {isLangMenuOpen && (
                     <div className="absolute top-full right-0 mt-2 w-48 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-xl py-2 animate-fade-in-down">
-                        <button onClick={() => changeLanguage('en')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">English</button>
-                        <button onClick={() => changeLanguage('fr')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Français</button>
-                        <button onClick={() => changeLanguage('de')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Deutsch</button>
-                        <button onClick={() => changeLanguage('es')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Español</button>
-                        <button onClick={() => changeLanguage('ar')} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10" dir="rtl">العربية</button>
+                        <button onClick={() => { changeLanguage('en'); setIsLangMenuOpen(false); }} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">English</button>
+                        <button onClick={() => { changeLanguage('fr'); setIsLangMenuOpen(false); }} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Français</button>
+                        <button onClick={() => { changeLanguage('de'); setIsLangMenuOpen(false); }} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Deutsch</button>
+                        <button onClick={() => { changeLanguage('es'); setIsLangMenuOpen(false); }} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10">Español</button>
+                        <button onClick={() => { changeLanguage('ar'); setIsLangMenuOpen(false); }} className="w-full text-left block px-4 py-2 text-sm text-blue-100 hover:bg-white/10" dir="rtl">العربية</button>
                     </div>
                 )}
             </div>

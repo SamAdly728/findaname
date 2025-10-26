@@ -204,10 +204,19 @@
       }
     
       function changeLanguage(lang) {
-        // Set the cookie that Google Translate widget reads on load
+        // 1. Set the cookie. This will handle translation for subsequent page loads.
         document.cookie = `googtrans=/en/${lang}; path=/`;
-        // Reload the page for the cookie to be read and translation applied
-        window.location.reload();
+
+        // 2. Try to change the language on the current page without reloading.
+        const selectElement = document.querySelector('select.goog-te-combo');
+        if (selectElement) {
+          selectElement.value = lang;
+          selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+        } else {
+          // 3. If the widget is not ready, reload the page to apply the cookie.
+          console.warn('Google Translate widget not found. Falling back to cookie-based reload.');
+          window.location.reload();
+        }
 
         return false; // Prevent default anchor behavior
       }
