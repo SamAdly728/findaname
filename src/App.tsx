@@ -3,7 +3,6 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { DomainCard } from './components/DomainCard';
 import { WhoisModal } from './components/WhoisModal';
-import { AdsenseBlock } from './components/AdsenseBlock';
 import { ProgressBar } from './components/ProgressBar';
 import { generateDomains, checkAvailability, getWhoisInfo } from './services/geminiService';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -191,10 +190,8 @@ const App: React.FC = () => {
         {isLoading && (
           <ProgressBar progress={progress} text={progressText} />
         )}
-
-        <div className="max-w-2xl mx-auto">
-          <AdsenseBlock slot="5928091834" />
-        </div>
+        
+        {/* AdSense block removed. Auto ads will be handled by the script in index.html */}
         
         <div ref={resultsRef}>
           {!isLoading && domains.length > 0 && (
@@ -221,6 +218,142 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
+      
+      {/* New How It Works Section */}
+      <div className="container mx-auto px-4 my-16">
+        <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-blue-200">
+                Three Simple Steps to Your Perfect Domain
+            </h2>
+            <p className="text-lg text-blue-100/80 mb-10">
+                Our AI-powered process makes finding a unique and brandable name effortless.
+            </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto text-center">
+            <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+                <div className="text-5xl mb-4 font-bold text-blue-400">1.</div>
+                <h3 className="text-xl font-bold text-blue-100 mb-2">Enter Your Idea</h3>
+                <p className="text-blue-200/80">Start with a keyword, a concept, or even a feeling. The more context you give our AI, the better the results.</p>
+            </div>
+            <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+                <div className="text-5xl mb-4 font-bold text-blue-400">2.</div>
+                <h3 className="text-xl font-bold text-blue-100 mb-2">Get AI Suggestions</h3>
+                <p className="text-blue-200/80">Our AI generates dozens of creative, brandable domain names in seconds, complete with high-value TLDs like .com, .ai, and .io.</p>
+            </div>
+            <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+                <div className="text-5xl mb-4 font-bold text-blue-400">3.</div>
+                <h3 className="text-xl font-bold text-blue-100 mb-2">Check & Secure</h3>
+                <p className="text-blue-200/80">Instantly see which names are available. When you find the perfect one, secure it through our affiliate partner, NameSilo.</p>
+            </div>
+        </div>
+      </div>
+
+      {/* New Blog Section */}
+      <div className="container mx-auto px-4 my-16">
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-blue-200">
+            Latest Insights From Our Blog
+          </h2>
+          <p className="text-lg text-blue-100/80 mb-10">
+            Explore strategies for branding, SEO, and growing your online presence.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <a href="/blog/post-1-perfect-tld.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">Beyond .com: Choosing the Perfect TLD</h3>
+            <p className="text-blue-200/80">Learn how to select the best Top-Level Domain for your business in the AI era.</p>
+          </a>
+          <a href="/blog/post-2-brandable-domain-strategies.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">The Art of the Brandable Domain</h3>
+            <p className="text-blue-200/80">Discover 7 powerful strategies for creating a memorable domain name using AI.</p>
+          </a>
+          <a href="/blog/post-3-beginners-guide-to-seo.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">A Beginner's Guide to SEO</h3>
+            <p className="text-blue-200/80">Got the perfect domain? Here are the essential first steps to get found on Google.</p>
+          </a>
+        </div>
+         <div className="text-center mt-10">
+            <a href="/blog/" className="inline-block bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-500 transition-colors transform hover:scale-105">
+                Explore All Articles
+            </a>
+        </div>
+      </div>
+
+      {/* New Tools Section */}
+      <div className="container mx-auto px-4 my-16">
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-blue-200">
+            Explore Our Full Suite of Domain Tools
+          </h2>
+          <p className="text-lg text-blue-100/80 mb-10">
+            Everything you need to find, analyze, and value your next big idea.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <a href="/dns-lookup.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">DNS Lookup</h3>
+            <p className="text-blue-200/80">Check A, CNAME, MX, and other DNS records for any domain.</p>
+          </a>
+          <a href="/whois-lookup.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">WHOIS Lookup</h3>
+            <p className="text-blue-200/80">Find registration data, and ownership details for any domain.</p>
+          </a>
+          <a href="/seo-checker.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">SEO Checker</h3>
+            <p className="text-blue-200/80">Get a free technical SEO audit and performance score for your website.</p>
+          </a>
+          <a href="/domain-value-calculator.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">Domain Value Calculator</h3>
+            <p className="text-blue-200/80">Estimate the value of any domain with our AI-powered tool.</p>
+          </a>
+          <a href="/hosting-lookup.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">Hosting Checker</h3>
+            <p className="text-blue-200/80">Discover who is hosting any website instantly.</p>
+          </a>
+          <a href="/website-down-checker.html" className="block p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-white/20 hover:-translate-y-1">
+            <h3 className="text-xl font-bold text-blue-100 mb-2">Website Down Checker</h3>
+            <p className="text-blue-200/80">Check if a website is down for everyone or just you.</p>
+          </a>
+        </div>
+      </div>
+
+      {/* New FAQ Section */}
+      <div className="container mx-auto px-4 my-16">
+        <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-10 text-blue-200">
+                Frequently Asked Questions
+            </h2>
+        </div>
+        <div className="max-w-3xl mx-auto space-y-6">
+            <div className="bg-white/5 p-6 rounded-xl border border-white/10 text-left">
+                <h3 className="text-xl font-bold text-blue-100 mb-2">What kind of keywords should I use?</h3>
+                <p className="text-blue-200/80">You can use anything! Try single words ('fitness'), combinations ('quantum ai'), industry terms ('saas startup'), or even abstract concepts ('peaceful productivity'). The AI is designed to be creative, so experiment with different ideas to see what works best.</p>
+            </div>
+            <div className="bg-white/5 p-6 rounded-xl border border-white/10 text-left">
+                <h3 className="text-xl font-bold text-blue-100 mb-2">Why are .com domains so hard to find?</h3>
+                <p className="text-blue-200/80">.com is the original and most popular TLD, so most short and common names have been registered for years. Our AI helps by suggesting creative alternatives and using other popular TLDs like .ai, .io, and .co that are perfect for modern brands.</p>
+            </div>
+            <div className="bg-white/5 p-6 rounded-xl border border-white/10 text-left">
+                <h3 className="text-xl font-bold text-blue-100 mb-2">What is a brandable domain?</h3>
+                <p className="text-blue-200/80">A brandable domain is a name that is unique, memorable, and easy to say and spell. It doesn't have to be descriptive. Think 'Google' or 'Spotify'—these names were invented but are now iconic brands. Our tool specializes in creating these kinds of names.</p>
+            </div>
+            <div className="bg-white/5 p-6 rounded-xl border border-white/10 text-left">
+                <h3 className="text-xl font-bold text-blue-100 mb-2">Is this tool free to use?</h3>
+                <p className="text-blue-200/80">Yes, our domain name generator is 100% free to use. If you choose to purchase a domain through the links we provide, we may earn a small affiliate commission at no extra cost to you. This helps us keep the tool running.</p>
+            </div>
+        </div>
+      </div>
+
+      {/* New CTA Section */}
+      <div className="container mx-auto px-4 -mt-4 mb-12">
+        <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-600/30 to-teal-500/30 rounded-xl shadow-lg p-8 text-center border border-white/20">
+            <h2 className="text-3xl font-bold text-white mb-3">Need a Developer to Bring Your Idea to Life?</h2>
+            <p className="text-blue-100/90 mb-6 max-w-2xl mx-auto">You've found the perfect domain. If you need help building a stunning, high-performance website, our team of experts is ready to assist. Let's chat about your project!</p>
+            <a href="https://wa.me/639495868221" target="_blank" rel="noopener noreferrer" className="inline-block bg-white text-blue-600 font-semibold px-8 py-3 rounded-lg hover:bg-gray-200 transition-colors transform hover:scale-105">
+                Chat With Us on WhatsApp
+            </a>
+        </div>
+      </div>
 
       {isModalOpen && selectedDomain && (
         <WhoisModal
