@@ -19,8 +19,8 @@ export const Header: React.FC = () => {
       <a href="/dns-lookup.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">DNS Lookup</a>
       <a href="/whois-lookup.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">WHOIS</a>
       <a href="/seo-checker.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">SEO Checker</a>
-      <a href="/domain-value-calculator.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">Domain Value</a>
       <a href="/blog/" className="text-blue-200/80 hover:text-white transition-colors font-medium">Blog</a>
+      <a href="/about.html" className="text-blue-200/80 hover:text-white transition-colors font-medium">About Us</a>
     </>
   );
 

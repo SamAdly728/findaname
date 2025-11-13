@@ -24,6 +24,8 @@ export const Footer: React.FC = () => {
         </div>
         <p>&copy; {new Date().getFullYear()} FindAName.live. All rights reserved.</p>
         <div className="mt-2 space-x-4">
+          <a href="/about.html" className="hover:text-blue-300 transition-colors">About Us</a>
+          <span>|</span>
           <a href="/privacy.html" className="hover:text-blue-300 transition-colors">Privacy Policy</a>
           <span>|</span>
           <a href="/terms.html" className="hover:text-blue-300 transition-colors">Terms of Service</a>
