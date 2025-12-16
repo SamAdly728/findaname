@@ -191,8 +191,6 @@ const App: React.FC = () => {
           <ProgressBar progress={progress} text={progressText} />
         )}
         
-        {/* AdSense block removed. Auto ads will be handled by the script in index.html */}
-        
         <div ref={resultsRef}>
           {!isLoading && domains.length > 0 && (
             <div className="text-center my-6">
@@ -219,7 +217,7 @@ const App: React.FC = () => {
         </div>
       </main>
       
-      {/* New How It Works Section */}
+      {/* How It Works Section */}
       <div className="container mx-auto px-4 my-16">
         <div className="text-center max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-blue-200">
@@ -248,7 +246,41 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* New Blog Section */}
+      {/* Domain Naming Academy (New Rich Content for AdSense Quality) */}
+      <div className="bg-white/5 py-16 border-y border-white/10">
+        <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-8 text-center text-blue-200">
+                    Domain Naming Academy: Essential Knowledge
+                </h2>
+                
+                <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="text-xl font-bold text-blue-100 mb-2">The Psychology of a Great Domain</h3>
+                            <p className="text-blue-200/80">A domain name is your first impression. Psychologically, short and pronounceable names reduce "cognitive load," making them easier to remember and trust. Our AI focuses on phonetic fluency to ensure your domain sticks in the user's mind.</p>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-blue-100 mb-2">Understanding TLDs (Top-Level Domains)</h3>
+                            <p className="text-blue-200/80">While <strong>.com</strong> remains the gold standard for global trust, modern extensions like <strong>.io</strong> (tech startups), <strong>.ai</strong> (artificial intelligence), and <strong>.store</strong> (e-commerce) allow for more creativity and availability. Choosing the right TLD is about matching your industry vertical.</p>
+                        </div>
+                    </div>
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="text-xl font-bold text-blue-100 mb-2">SEO Implications of Your Name</h3>
+                            <p className="text-blue-200/80">Exact Match Domains (EMDs) are less critical than they used to be. Google now prioritizes brandable names over generic keyword strings. However, having a relevant keyword in your domain (e.g., 'tech' or 'shop') can still provide a small relevancy signal to search engines.</p>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-blue-100 mb-2">Protecting Your Brand</h3>
+                            <p className="text-blue-200/80">Once you secure your primary domain, consider registering common misspellings or alternative TLDs to protect your brand identity. This prevents competitors from capitalizing on your traffic and secures your digital real estate footprint.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      {/* Blog Section */}
       <div className="container mx-auto px-4 my-16">
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-blue-200">
@@ -279,7 +311,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* New Tools Section */}
+      {/* Tools Section */}
       <div className="container mx-auto px-4 my-16">
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-blue-200">
@@ -317,7 +349,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* New FAQ Section */}
+      {/* FAQ Section */}
       <div className="container mx-auto px-4 my-16">
         <div className="text-center max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-10 text-blue-200">
@@ -344,13 +376,13 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* New CTA Section */}
+      {/* CTA Section */}
       <div className="container mx-auto px-4 -mt-4 mb-12">
         <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-600/30 to-teal-500/30 rounded-xl shadow-lg p-8 text-center border border-white/20">
             <h2 className="text-3xl font-bold text-white mb-3">Need a Developer to Bring Your Idea to Life?</h2>
             <p className="text-blue-100/90 mb-6 max-w-2xl mx-auto">You've found the perfect domain. If you need help building a stunning, high-performance website, our team of experts is ready to assist. Let's chat about your project!</p>
-            <a href="https://wa.me/639495868221" target="_blank" rel="noopener noreferrer" className="inline-block bg-white text-blue-600 font-semibold px-8 py-3 rounded-lg hover:bg-gray-200 transition-colors transform hover:scale-105">
-                Chat With Us on WhatsApp
+            <a href="https://m.me/samadly728" target="_blank" rel="noopener noreferrer" className="inline-block bg-white text-blue-600 font-semibold px-8 py-3 rounded-lg hover:bg-gray-200 transition-colors transform hover:scale-105">
+                Chat With Us on Messenger
             </a>
         </div>
       </div>

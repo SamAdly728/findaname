@@ -172,43 +172,50 @@
             </div>
         </div>
         
-        <div class="mt-12 text-left space-y-4">
-            <h2 class="text-2xl font-bold text-blue-200">What is a DNS Lookup?</h2>
-            <p>The Domain Name System (DNS) is the phonebook of the internet. When you type a domain like "google.com" into your browser, your computer uses DNS to look up the corresponding IP address (e.g., 172.217.10.142) to connect to the server. Our DNS Lookup tool allows you to query the DNS records for any domain name.</p>
-            <p>This is useful for troubleshooting website issues, verifying DNS configuration changes, and seeing the infrastructure behind a domain. You can check common record types like A (IP address), MX (mail servers), CNAME (aliases), TXT (text records for verification), and more.</p>
-        </div>
+        <div class="mt-16 text-left space-y-8">
+            <div class="prose prose-invert max-w-none">
+                <h2 class="text-3xl font-bold text-blue-200">Comprehensive Guide to DNS Records</h2>
+                <p>The Domain Name System (DNS) is often called the "phonebook of the internet." It translates human-readable domain names (like <code>findaname.live</code>) into machine-readable IP addresses (like <code>192.0.2.1</code>). Understanding DNS records is crucial for website owners, IT professionals, and developers. This guide breaks down the most critical components of DNS management.</p>
+                
+                <h3 class="text-2xl font-bold text-blue-300 mt-6">Deep Dive into Record Types</h3>
+                
+                <div class="grid md:grid-cols-2 gap-6 mt-4">
+                    <div class="bg-white/5 p-5 rounded-lg border border-white/10">
+                        <h4 class="text-lg font-bold text-teal-300 mb-2">A Record (Address)</h4>
+                        <p class="text-sm">The most fundamental record. It maps a domain to an IPv4 address. Without an A record, users cannot reach your website via its domain name.</p>
+                        <p class="text-xs text-gray-400 mt-2">Example: <code>example.com -> 93.184.216.34</code></p>
+                    </div>
+                    <div class="bg-white/5 p-5 rounded-lg border border-white/10">
+                        <h4 class="text-lg font-bold text-teal-300 mb-2">AAAA Record (IPv6 Address)</h4>
+                        <p class="text-sm">Similar to the A record, but for IPv6 addresses. As the internet runs out of IPv4 addresses, AAAA records are becoming increasingly important for future-proofing your site.</p>
+                        <p class="text-xs text-gray-400 mt-2">Example: <code>example.com -> 2606:2800:220:1:248:1893:25c8:1946</code></p>
+                    </div>
+                    <div class="bg-white/5 p-5 rounded-lg border border-white/10">
+                        <h4 class="text-lg font-bold text-teal-300 mb-2">MX Record (Mail Exchange)</h4>
+                        <p class="text-sm">Specifies the mail server responsible for accepting email on behalf of a domain domain. You can have multiple MX records with different priorities to ensure email delivery redundancy.</p>
+                    </div>
+                    <div class="bg-white/5 p-5 rounded-lg border border-white/10">
+                        <h4 class="text-lg font-bold text-teal-300 mb-2">CNAME (Canonical Name)</h4>
+                        <p class="text-sm">Maps an alias name to a true or "canonical" domain name. It is often used to map a subdomain like <code>www</code> to the root domain.</p>
+                    </div>
+                    <div class="bg-white/5 p-5 rounded-lg border border-white/10">
+                        <h4 class="text-lg font-bold text-teal-300 mb-2">TXT Record (Text)</h4>
+                        <p class="text-sm">Originally for human-readable text, now primarily used for verification (Google Search Console) and email security protocols like SPF, DKIM, and DMARC to prevent spoofing.</p>
+                    </div>
+                    <div class="bg-white/5 p-5 rounded-lg border border-white/10">
+                        <h4 class="text-lg font-bold text-teal-300 mb-2">NS Record (Nameserver)</h4>
+                        <p class="text-sm">Delegates a DNS zone to use the given authoritative name servers. These records tell the internet which servers hold the "truth" about your domain's DNS configuration.</p>
+                    </div>
+                </div>
 
-        <div class="mt-12 text-left space-y-4">
-            <h2 class="text-2xl font-bold text-blue-200">Common DNS Record Types Explained</h2>
-            <div class="space-y-4">
-                <div class="bg-white/5 p-4 rounded-lg">
-                    <h3 class="font-bold text-blue-300">A Record (Address)</h3>
-                    <p>The most basic type of DNS record. It points a domain or subdomain to an IPv4 address (e.g., 192.0.2.1). This is what your browser uses to find the server hosting a website.</p>
-                </div>
-                <div class="bg-white/5 p-4 rounded-lg">
-                    <h3 class="font-bold text-blue-300">CNAME Record (Canonical Name)</h3>
-                    <p>Points one domain or subdomain to another domain name. For example, `www.example.com` might have a CNAME record pointing to `example.com`. This allows you to update one A record (`example.com`) and have all aliases follow suit.</p>
-                </div>
-                <div class="bg-white/5 p-4 rounded-lg">
-                    <h3 class="font-bold text-blue-300">MX Record (Mail Exchange)</h3>
-                    <p>Directs email to a mail server. These records are critical for your email to function correctly, pointing to services like Google Workspace or Microsoft 365.</p>
-                </div>
-                <div class="bg-white/5 p-4 rounded-lg">
-                    <h3 class="font-bold text-blue-300">TXT Record (Text)</h3>
-                    <p>Allows an administrator to store text notes in the DNS record. It's commonly used for verifying domain ownership for services like Google Search Console, or for email security protocols like SPF and DKIM.</p>
-                </div>
+                <h3 class="text-2xl font-bold text-blue-300 mt-8">Troubleshooting Common DNS Issues</h3>
+                <ul class="list-disc list-inside space-y-3 mt-4 text-blue-100/90">
+                    <li><strong>Propagation Delays:</strong> DNS changes can take up to 48 hours to spread globally. If you recently changed records and don't see them, wait a few hours and try again.</li>
+                    <li><strong>TTL (Time to Live):</strong> This value determines how long a record is cached by DNS resolvers. A high TTL (e.g., 86400 seconds = 24 hours) means changes take longer to propagate. Lower the TTL before making migration changes.</li>
+                    <li><strong>Email Delivery Failures:</strong> Often caused by incorrect MX records or missing SPF/DKIM records in your TXT settings. Use this tool to verify your MX records point to your email provider (e.g., Google Workspace, Outlook).</li>
+                    <li><strong>"Server Not Found" Errors:</strong> This usually points to a missing or incorrect A record. Ensure your domain points to the correct public IP address of your web server.</li>
+                </ul>
             </div>
-        </div>
-
-        <div class="mt-12 text-left space-y-4">
-            <h2 class="text-2xl font-bold text-blue-200">Practical Use Cases for DNS Lookup</h2>
-            <p>While it seems technical, checking DNS records has many practical applications for website owners, developers, and marketers:</p>
-            <ul class="list-disc list-inside ml-4 space-y-2">
-                <li><strong>Troubleshooting Email Delivery:</strong> If your emails aren't being delivered, checking your MX and TXT (for SPF/DKIM) records is the first step to diagnose the problem.</li>
-                <li><strong>Verifying Website Migration:</strong> After moving to a new web host and changing your A records, you can use this tool to confirm that the changes have propagated correctly across the internet.</li>
-                <li><strong>Competitor Analysis:</strong> You can inspect a competitor's DNS records to see which email provider they use (via MX records) or if they use services like Cloudflare (via NS records).</li>
-                <li><strong>Security Audits:</strong> Checking for unexpected or unauthorized records can be an early sign of a security issue or domain hijacking attempt.</li>
-            </ul>
         </div>
 
         <div class="mt-12 text-center">
@@ -244,28 +251,21 @@
       }
     
       function changeLanguage(lang) {
-        // 1. Set the cookie. This will handle translation for subsequent page loads.
         document.cookie = `googtrans=/en/${lang}; path=/`;
-
-        // 2. Try to change the language on the current page without reloading.
         const selectElement = document.querySelector('select.goog-te-combo');
         if (selectElement) {
           selectElement.value = lang;
           selectElement.dispatchEvent(new Event('change', { bubbles: true }));
         } else {
-          // 3. If the widget is not ready, reload the page to apply the cookie.
-          console.warn('Google Translate widget not found. Falling back to cookie-based reload.');
           window.location.reload();
         }
-
-        return false; // Prevent default anchor behavior
+        return false; 
       }
     </script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('footer p').innerHTML = `&copy; ${new Date().getFullYear()} FindAName.live. All rights reserved.`;
         
-        // Mobile menu logic
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const openIcon = document.getElementById('menu-open-icon');
@@ -279,7 +279,6 @@
           });
         }
         
-        // Language menu logic
         const langMenuButton = document.getElementById('lang-menu-button');
         const langMenu = document.getElementById('lang-menu');
         
@@ -290,7 +289,6 @@
             });
         }
         
-        // Close dropdowns if clicking outside
         document.addEventListener('click', function (event) {
             if (langMenu && !langMenu.classList.contains('hidden') && !langMenuButton.contains(event.target)) {
                 langMenu.classList.add('hidden');

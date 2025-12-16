@@ -172,27 +172,40 @@
             </div>
         </div>
 
-        <div class="mt-12 text-left space-y-4">
-            <h2 class="text-2xl font-bold text-blue-200">What is WHOIS Data?</h2>
-            <p>WHOIS is a public record of who owns a domain name and how to get in contact with them. When someone registers a domain, ICANN (the organization that manages domain names) requires them to provide contact information. This information is then stored in the public WHOIS database.</p>
-            <p>Our tool queries this database to retrieve key details like the domain registrar, creation and expiration dates, the domain's current status, and the nameservers it points to. It's an essential tool for researching domain ownership, checking a domain's age, or finding contact information for a website owner.</p>
-        </div>
+        <div class="mt-16 text-left space-y-8">
+            <div class="prose prose-invert max-w-none">
+                <h2 class="text-3xl font-bold text-blue-200">The Ultimate Guide to WHOIS Data</h2>
+                <p>WHOIS is a public database that houses the information of everyone who has registered a domain name or an IP address block. It functions like a public ledger, maintained by the Internet Corporation for Assigned Names and Numbers (ICANN). Whenever a domain is bought, the registrar is required to collect contact data and submit it to the WHOIS database.</p>
+                
+                <div class="bg-white/10 p-6 rounded-lg border border-white/20 mt-6">
+                    <h3 class="text-xl font-bold text-teal-300 mb-3">Why is WHOIS Important?</h3>
+                    <ul class="list-disc list-inside space-y-2 text-blue-100/90">
+                        <li><strong>Verification:</strong> It proves domain ownership and age, which is vital for SEO and buying/selling domains.</li>
+                        <li><strong>Contact:</strong> It provides a way to contact a webmaster for business inquiries, legal issues, or technical problems.</li>
+                        <li><strong>Transparency:</strong> It helps maintain a transparent internet ecosystem by holding domain owners accountable.</li>
+                    </ul>
+                </div>
 
-        <div class="mt-12 text-left space-y-4">
-            <h2 class="text-2xl font-bold text-blue-200">WHOIS Privacy: Protecting Your Personal Information</h2>
-            <p>When you register a domain, your personal contact information (name, address, email, phone number) is added to the public WHOIS database. This can lead to spam, unwanted solicitations, and a loss of privacy.</p>
-            <p><strong>WHOIS Privacy</strong> (sometimes called Domain Privacy or ID Protect) is a service offered by most domain registrars that replaces your personal information in the WHOIS database with the information of a proxy service. This keeps your details private while still complying with ICANN's rules. We highly recommend enabling WHOIS privacy for all your domains unless you have a specific reason to keep your information public.</p>
-        </div>
+                <h3 class="text-2xl font-bold text-blue-300 mt-8">GDPR, Privacy, and Redacted Data</h3>
+                <p>Since the introduction of the General Data Protection Regulation (GDPR) in Europe, the WHOIS landscape has changed significantly. To protect user privacy, many registrars now automatically "redact" or hide personal information from the public WHOIS record.</p>
+                <p>When you look up a domain today, you might see "Redacted for Privacy" or "Data Protected" in the registrant fields. This doesn't mean the data doesn't exist; it just means it's shielded from public view to comply with data protection laws. However, there are still legitimate ways to contact domain owners through proxy email addresses provided in the record.</p>
 
-        <div class="mt-12 text-left space-y-4">
-            <h2 class="text-2xl font-bold text-blue-200">Understanding WHOIS Status Codes</h2>
-            <p>The WHOIS record often includes status codes that tell you about the state of the domain. Here are some of the most common ones:</p>
-            <ul class="list-disc list-inside ml-4 space-y-2">
-                <li><strong>ok:</strong> This is the standard status. The domain is active and can be renewed, but not transferred.</li>
-                <li><strong>clientTransferProhibited:</strong> This is a security measure set by your registrar to prevent unauthorized transfers. You must ask your registrar to remove this status before you can transfer the domain to another provider.</li>
-                <li><strong>redemptionPeriod:</strong> This means the domain has expired, and the original owner has a grace period (usually 30 days) to renew it, often for a higher fee. After this period, it may be released to the public.</li>
-                <li><strong>pendingDelete:</strong> The domain has passed the redemption period and is waiting to be deleted from the registry. Once deleted, it becomes available for anyone to register.</li>
-            </ul>
+                <h3 class="text-2xl font-bold text-blue-300 mt-8">Common WHOIS Status Codes Explained</h3>
+                <div class="space-y-4 mt-4">
+                    <div>
+                        <span class="font-bold text-green-400">OK / Active:</span>
+                        <p class="text-sm text-blue-200/80">The standard status for a healthy, active domain. It can be transferred or updated.</p>
+                    </div>
+                    <div>
+                        <span class="font-bold text-yellow-400">clientTransferProhibited:</span>
+                        <p class="text-sm text-blue-200/80">A safety lock enabled by the registrar to prevent unauthorized transfers. This is a good security feature.</p>
+                    </div>
+                    <div>
+                        <span class="font-bold text-red-400">redemptionPeriod:</span>
+                        <p class="text-sm text-blue-200/80">The domain has expired and is in a grace period. The original owner can still reclaim it, usually for a fee, before it is deleted and released to the public.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="mt-12 text-center">
@@ -228,28 +241,21 @@
       }
     
       function changeLanguage(lang) {
-        // 1. Set the cookie. This will handle translation for subsequent page loads.
         document.cookie = `googtrans=/en/${lang}; path=/`;
-
-        // 2. Try to change the language on the current page without reloading.
         const selectElement = document.querySelector('select.goog-te-combo');
         if (selectElement) {
           selectElement.value = lang;
           selectElement.dispatchEvent(new Event('change', { bubbles: true }));
         } else {
-          // 3. If the widget is not ready, reload the page to apply the cookie.
-          console.warn('Google Translate widget not found. Falling back to cookie-based reload.');
           window.location.reload();
         }
-
-        return false; // Prevent default anchor behavior
+        return false; 
       }
     </script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('footer p').innerHTML = `&copy; ${new Date().getFullYear()} FindAName.live. All rights reserved.`;
         
-        // Mobile menu logic
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const openIcon = document.getElementById('menu-open-icon');
@@ -263,7 +269,6 @@
           });
         }
         
-        // Language menu logic
         const langMenuButton = document.getElementById('lang-menu-button');
         const langMenu = document.getElementById('lang-menu');
         
@@ -274,7 +279,6 @@
             });
         }
         
-        // Close dropdowns if clicking outside
         document.addEventListener('click', function (event) {
             if (langMenu && !langMenu.classList.contains('hidden') && !langMenuButton.contains(event.target)) {
                 langMenu.classList.add('hidden');
