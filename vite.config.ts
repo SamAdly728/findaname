@@ -10,10 +10,29 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, cwd(), '');
   return {
     plugins: [react()],
+    build: {
+      rollupOptions: {
+        input: {
+          main: './index.html',
+          tools: './src/tools.ts',
+          dns: './dns-lookup.html',
+          whois: './whois-lookup.html',
+          seo: './seo-checker.html',
+          value: './domain-value-calculator.html',
+          hosting: './hosting-lookup.html',
+          nameservers: './nameserver-lookup.html',
+          down: './website-down-checker.html',
+          privacy: './privacy.html',
+          terms: './terms.html',
+          contact: './contact.html'
+        }
+      }
+    },
     define: {
       // Expose environment variables to the client.
       // IMPORTANT: You must set these in your deployment environment (e.g., on Render.com).
-      'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY)
+      'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY)
     }
   }
 })

@@ -1,4 +1,5 @@
-import { GoogleGenAI, Type } from 'https://aistudiocdn.com/@google/genai@^1.24.0';
+import { GoogleGenAI, Type } from '@google/genai';
+import './index.css';
 
 document.addEventListener('DOMContentLoaded', () => {
     // This key was provided for WhoisXMLAPI services.
@@ -19,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} input - The user's input string.
      * @returns {string} A sanitized domain name.
      */
-    const sanitizeDomain = (input) => {
+    const sanitizeDomain = (input: any) => {
         if (!input) return '';
         let domain = input.trim().toLowerCase();
         domain = domain.replace(/^(https?:\/\/)?/i, '');
@@ -34,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} input - The user's input string.
      * @returns {string|null} A valid URL or null.
      */
-    const getValidUrl = (input) => {
+    const getValidUrl = (input: any) => {
         if (!input) return null;
         let url = input.trim();
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const showLoading = (container, text = 'Fetching data...') => {
+    const showLoading = (container: HTMLElement, text = 'Fetching data...') => {
         container.innerHTML = `
             <div class="flex flex-col items-center justify-center h-48">
                 <svg class="h-10 w-10 animate-spin text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -59,11 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
     
-    const renderError = (container, message) => {
+    const renderError = (container: HTMLElement, message: string) => {
         container.innerHTML = `<div class="text-center text-red-400 bg-red-500/10 p-4 rounded-lg">${sanitizeHTML(message)}</div>`;
     };
     
-    const sanitizeHTML = (str) => {
+    const sanitizeHTML = (str: any) => {
         if (str === null || str === undefined) return '';
         const temp = document.createElement('div');
         temp.textContent = str.toString();
@@ -74,19 +75,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dnsForm) {
         dnsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const domain = sanitizeDomain(dnsForm.querySelector('input').value);
+            const inputElement = dnsForm.querySelector('input');
+            if (!inputElement) return;
+            const domain = sanitizeDomain(inputElement.value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
+            if (!resultsContainer) return;
             showLoading(resultsContainer);
 
             const recordTypesToQuery = ['A', 'AAAA', 'MX', 'TXT', 'NS', 'CNAME', 'SOA'];
             const promises = recordTypesToQuery.map(type => 
-                fetch(`https://dns.google/resolve?name=${domain}&type=${type}`)
+                window.fetch(`https://dns.google/resolve?name=${domain}&type=${type}`, {
+                    mode: 'cors',
+                    referrerPolicy: 'no-referrer'
+                })
             );
 
             try {
                 const responses = await Promise.allSettled(promises);
-                let allAnswers = [];
+                let allAnswers: any[] = [];
 
                 for (const response of responses) {
                     if (response.status === 'fulfilled') {
@@ -118,17 +125,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (whoisForm) {
         whoisForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const domain = sanitizeDomain(whoisForm.querySelector('input').value);
+            const inputElement = whoisForm.querySelector('input');
+            if (!inputElement) return;
+            const domain = sanitizeDomain(inputElement.value);
             if (!domain) return;
             const resultsContainer = document.getElementById('results-container');
+            if (!resultsContainer) return;
             showLoading(resultsContainer);
 
             const whoisUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${whoisApiKey}&domainName=${domain}&outputFormat=JSON`;
             const hostingUrl = `https://ipinfo.io/${domain}/json`;
 
             const [whoisResponse, hostingResponse] = await Promise.allSettled([
-                fetch(whoisUrl),
-                fetch(hostingUrl)
+                window.fetch(whoisUrl, { mode: 'cors', referrerPolicy: 'no-referrer' }),
+                window.fetch(hostingUrl, { mode: 'cors', referrerPolicy: 'no-referrer' })
             ]);
 
             let whoisData = null;
@@ -157,8 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (seoForm) {
         seoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const url = getValidUrl(seoForm.querySelector('input').value);
+            const inputElement = seoForm.querySelector('input');
+            if (!inputElement) return;
+            const url = getValidUrl(inputElement.value);
             const resultsContainer = document.getElementById('results-container');
+            if(!resultsContainer) return;
 
             if (!url) {
                 renderError(resultsContainer, 'Please enter a valid URL (e.g., https://example.com)');
@@ -170,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO&key=${pagespeedApiKey}`;
             
             try {
-                const response = await fetch(apiUrl);
+                const response = await window.fetch(apiUrl, { mode: 'cors', referrerPolicy: 'no-referrer' });
                 if (!response.ok) {
                     const errorData = await response.json();
                     if (errorData.error && errorData.error.message.includes('API key not valid')) {
@@ -194,12 +207,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (domainValueForm) {
         domainValueForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const domain = sanitizeDomain(document.getElementById('domain-value-input').value);
+            const domain = sanitizeDomain((document.getElementById('domain-value-input') as HTMLInputElement)?.value);
             const resultsContainer = document.getElementById('results-container');
+            if (!resultsContainer) return;
 
             // IMPORTANT: The user requested to use a single, shared API key for this public tool.
             // This is generally not recommended for security reasons, but implemented as requested.
-            const geminiApiKey = 'AIzaSyDxOsoftRvgcYJrfnhLZISm2jZU0zGn7G4';
+            const geminiApiKey = 'AIzaSyDybudN68S2DC4q1SKXm5TPFLi-mpxay9E';
 
             if (!domain) {
                 renderError(resultsContainer, 'Please enter a valid domain name.');
@@ -215,11 +229,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 // 1. Fetch WHOIS data for context
                 const whoisUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${whoisApiKey}&domainName=${domain}&outputFormat=JSON`;
-                const whoisResponse = await fetch(whoisUrl);
+                const whoisResponse = await window.fetch(whoisUrl, { mode: 'cors', referrerPolicy: 'no-referrer' });
                 const whoisData = await whoisResponse.json();
                 const record = whoisData?.WhoisRecord;
                 const domainAge = record?.createdDate ? 
-                    `${((new Date() - new Date(record.createdDate)) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1)} years` : 
+                    `${((new Date().getTime() - new Date(record.createdDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1)} years` : 
                     'new';
 
                 // 2. Call Gemini API with context
@@ -242,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
+                    model: 'gemini-3-flash-preview',
                     contents: prompt,
                     config: {
                       responseMimeType: 'application/json',
@@ -286,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                   });
 
-                const valuationData = JSON.parse(response.text);
+                const valuationData = JSON.parse(response.text || '');
                 renderDomainValueResults(resultsContainer, valuationData);
 
             } catch (error) {
@@ -296,13 +310,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    const renderGoogleDnsResults = (container, data) => {
-        const recordTypes = { 1: 'A', 2: 'NS', 5: 'CNAME', 6: 'SOA', 15: 'MX', 16: 'TXT', 28: 'AAAA', 33: 'SRV', 43: 'DS', 257: 'CAA' };
+    const renderGoogleDnsResults = (container: HTMLElement, data: any) => {
+        const recordTypes: any = { 1: 'A', 2: 'NS', 5: 'CNAME', 6: 'SOA', 15: 'MX', 16: 'TXT', 28: 'AAAA', 33: 'SRV', 43: 'DS', 257: 'CAA' };
         if (!data || !data.Answer || data.Answer.length === 0) {
             return renderError(container, 'No DNS records found for this domain.');
         }
         let html = '<div class="space-y-4">';
-        const recordsByType = data.Answer.reduce((acc, rec) => {
+        const recordsByType = data.Answer.reduce((acc: any, rec: any) => {
             const typeName = recordTypes[rec.type] || `Type ${rec.type}`;
             if (!acc[typeName]) {
                 acc[typeName] = [];
@@ -313,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const typeName in recordsByType) {
             html += `<h3 class="text-xl font-bold text-blue-200 mt-4 -mb-2">${typeName} Records</h3>`;
-            recordsByType[typeName].forEach(rec => {
+            recordsByType[typeName].forEach((rec: any) => {
                  html += `
                     <div class="p-3 bg-white/10 rounded-lg">
                         <div class="flex justify-between items-center">
@@ -330,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     };
 
-    const renderDataItem = (label, value) => {
+    const renderDataItem = (label: string, value: any) => {
         if (!value || (Array.isArray(value) && value.length === 0)) return '';
         const displayValue = Array.isArray(value) ? value.join('<br>') : sanitizeHTML(value);
         return `
@@ -341,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
 
-    const renderContactBlock = (title, contact) => {
+    const renderContactBlock = (title: string, contact: any) => {
         if (!contact) return '';
         const addressParts = [contact.street, contact.city, contact.state, contact.postalCode, contact.country].filter(Boolean);
         let html = `<h3 class="text-xl font-bold text-blue-200 mt-6 mb-2">${title}</h3><div class="space-y-0">`;
@@ -356,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return html;
     };
 
-    const renderWhoisAndHostingResults = (container, whoisData, hostingData) => {
+    const renderWhoisAndHostingResults = (container: HTMLElement, whoisData: any, hostingData: any) => {
         const record = whoisData?.WhoisRecord;
         let html = '<div class="space-y-0">';
 
@@ -395,13 +409,13 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     };
     
-    const renderSeoResults = (container, data) => {
+    const renderSeoResults = (container: HTMLElement, data: any) => {
         const results = data.lighthouseResult;
         const categories = results.categories;
         const audits = results.audits;
         const screenshot = audits['final-screenshot']?.details?.data;
 
-        const createScoreDonut = (title, score) => {
+        const createScoreDonut = (title: string, score: number) => {
             const scoreNum = Math.round(score * 100);
             let strokeColor = '#4ade80'; // green-400
             if (scoreNum < 90) strokeColor = '#facc15'; // yellow-400
@@ -423,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         };
 
-        const createVitalsCard = (metricId, title) => {
+        const createVitalsCard = (metricId: string, title: string) => {
             const metric = audits[metricId];
             if (!metric) return '';
             const value = metric.displayValue;
@@ -439,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         };
 
-        const createIssuesList = (title, auditRefs) => {
+        const createIssuesList = (title: string, auditRefs: any[]) => {
             if (!auditRefs || auditRefs.length === 0) return '';
             let itemsHtml = '';
             for (const ref of auditRefs) {
@@ -502,17 +516,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
 
-    const renderDomainValueResults = (container, data) => {
+    const renderDomainValueResults = (container: HTMLElement, data: any) => {
         const formattedValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(data.estimatedValue);
         
-        const confidenceClasses = {
+        const confidenceClasses: any = {
             'High': 'bg-green-500/20 text-green-300',
             'Medium': 'bg-yellow-500/20 text-yellow-300',
             'Low': 'bg-red-500/20 text-red-300',
         };
         const confidenceClass = confidenceClasses[data.valuationConfidence] || 'bg-gray-500/20 text-gray-300';
         
-        const factorList = (title, factors, icon) => {
+        const factorList = (title: string, factors: any[], icon: string) => {
             if (!factors || factors.length === 0) return '';
             return `
                 <div>
@@ -550,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  <div>
                     <h3 class="text-xl font-bold text-blue-200 mb-2">Monetization Strategies</h3>
                      <div class="flex flex-wrap gap-2">
-                         ${data.monetizationStrategies && data.monetizationStrategies.map(s => `
+                         ${data.monetizationStrategies && data.monetizationStrategies.map((s: any) => `
                             <span class="bg-teal-500/20 text-teal-300 px-3 py-1 text-sm font-semibold rounded-full">${sanitizeHTML(s)}</span>
                         `).join('')}
                     </div>

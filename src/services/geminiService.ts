@@ -11,10 +11,10 @@ const WHOISXML_API_KEY = 'at_r3gmzX6h7BWhsRcLyMAYNZJ1uQqsa';
  * @returns {GoogleGenAI} The initialized GoogleGenAI client.
  */
 function getAiClient(): GoogleGenAI {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
   if (!apiKey) {
     // This error will be caught by the calling function in App.tsx
-    throw new Error('VITE_GEMINI_API_KEY is not configured in the environment.');
+    throw new Error('GEMINI_API_KEY is not configured in the environment.');
   }
   return new GoogleGenAI({ apiKey });
 }
@@ -49,7 +49,7 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
   `;
   
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3-flash-preview',
     contents: prompt,
     config: {
       responseMimeType: 'application/json',
@@ -80,7 +80,7 @@ export const generateDomains = async (keyword: string): Promise<{name: string, d
   });
 
   try {
-    const jsonResponse = JSON.parse(response.text);
+    const jsonResponse = JSON.parse(response.text || '');
     return jsonResponse.domains || [];
   } catch (e) {
     console.error("Failed to parse Gemini response:", e, response.text);
@@ -126,7 +126,11 @@ export const getWhoisInfo = async (domainName: string): Promise<WhoisData> => {
   const apiUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${WHOISXML_API_KEY}&domainName=${domainName}&outputFormat=JSON`;
 
   try {
-    const response = await fetch(apiUrl);
+    // Explicitly use window.fetch and add mode/referrerPolicy to help with CORS and potential iframe restrictions.
+    const response = await window.fetch(apiUrl, {
+        mode: 'cors',
+        referrerPolicy: 'no-referrer'
+    });
      if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error(`WhoisXMLAPI WHOIS fetch failed for ${domainName}:`, response.status, errorData);
